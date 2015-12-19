@@ -1,0 +1,34 @@
+{
+  "name":        "zodiac",
+  "version":     "0.1.0",
+  "description": "Reactive web component microframework based on Tracker",
+  "keywords": [
+    "reactive",
+    "template",
+    "live",
+    "dom",
+    "views",
+    "components",
+    "web",
+    "spa",
+    "tracker"
+  ],
+  "homepage": "https://github.com/jbe/zodiac",
+  "bugs": {
+    "url": "https://github.com/jbe/zodiac/issues"
+  },
+  "license": "MIT",
+  "author":  "Jostein B. Eliassen (http://jostein.be)",
+  "main":    "pkg/zodiac.js",
+  "repository": "jbe/zodiac.git",
+  "scripts": {
+    "prepublish": "cake build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "coffee-script": ">= 1.1",
+    "browserify":    ">= 12",
+    "coffeeify":     ">= 1",
+    "uglify-js":     ">= 2"
+  }
+}
