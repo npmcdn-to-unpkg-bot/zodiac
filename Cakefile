@@ -1,52 +1,58 @@
 
 log = console.log
 
-{spawn, exec}   = require 'child_process'
-{writeFileSync} = require 'fs'
-Browserify      = require 'browserify'
-UglifyJS        = require 'uglify-js'
+fs            = require 'fs'
+{spawn, exec} = require 'child_process'
+Browserify    = require 'browserify'
+Coffeeify     = require 'coffeeify'
+Watchify      = require 'watchify'
+UglifyJS      = require 'uglify-js'
 
 mkopts = (str, r={}) -> r[s] = true for s in str.split(' '); r
 
 # Config
 
-BUILDS        = ['zodiac', 'tests']
-BROWSERIFY    = 'browserify -d -t coffeeify --extension=".coffee"'
-OPTS          = mkopts 'mangle screw_ie8'
-OPTS.compress = mkopts 'sequences dead_code conditionals booleans ' +
-                       'unused if_return join_vars drop_console'
+BUILDS          = ['zodiac', 'tests']
+BROWSERIFY      = {debug: true, extensions: ['.coffee']}
+WATCHIFY        = {cache: {}, packageCache: {}, plugin: [Watchify]}
+UGLIFY          = mkopts 'mangle screw_ie8'
+UGLIFY.compress = mkopts 'sequences dead_code conditionals booleans ' +
+                         'unused if_return join_vars drop_console'
 
-# Tasks
-
-task 'build', ->
-  for name in BUILDS
-    compile "src/#{name}.coffee",
-    "pkg/#{name}.js",
-    "pkg/#{name}.min.js"
-    console.log name
-
+task 'build', -> make name, false for name in BUILDS
+task 'auto',  -> make name, true  for name in BUILDS
 task 'clean', -> run 'rm pkg/*.js'
+task 'serve', ->
+  express = require('express')
+  app     = express()
+  port    = process.env.PORT || 4000;
+  app.use express.static __dirname
+  app.listen 3000
+  console.log 'Serving on localhost:3000/tests.html'
+  invoke 'auto'
 
+make = (name, auto) ->
+  build "src/#{name}.coffee", "pkg/#{name}", auto, -> console.log name
 
-# Helpers
+build = (entry, target, auto=false, onBuild) ->
+  opts = BROWSERIFY
+  opts[k] = v for k, v of WATCHIFY if auto
+  b = Browserify opts
+  b.transform(Coffeeify)
+  b.add entry
+  cb = ->
+    [plain, mini] = ["#{target}.js", "#{target}.min.js"]
+    b.bundle (error, js) ->
+      throw error if error?
+      fs.writeFileSync plain, js
+      fs.writeFileSync mini, UglifyJS.minify(plain, UGLIFY).code
+      onBuild() if onBuild?
+  b.on 'update', cb if auto
+  cb()
 
-compile = (entry, target, minTarget) ->
-  run "#{BROWSERIFY} #{entry} > #{target}", ->
-    writeFileSync minTarget, UglifyJS.minify(target, OPTS).code
-
-run = (args...) ->
-  for a in args
-    switch typeof a
-      when 'string' then command = a
-      when 'object'
-        if a instanceof Array then params = a
-        else options = a
-      when 'function' then callback = a
-
-  command += ' ' + params.join ' ' if params?
-  cmd = spawn '/bin/sh', ['-c', command], options
-
+run = (command, cb=null) ->
+  cmd = spawn '/bin/sh', ['-c', command]
   cmd.stdout.on 'data', (data) -> process.stdout.write data
   cmd.stderr.on 'data', (data) -> process.stderr.write data
   process.on    'SIGHUP',      -> cmd.kill()
-  cmd.on        'exit', (code) -> callback() if callback? and code is 0
+  cmd.on        'exit', (code) -> cb() if cb? and code is 0

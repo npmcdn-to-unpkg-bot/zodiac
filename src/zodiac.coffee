@@ -6,9 +6,4 @@ Zodiac =
   render: -> Zodiac.Renderer.render arguments...
 
 module.exports = Zodiac
-
-# TODO:
-# reactive dict, reactive var
-# components
-# tests
-
+window.Zodiac  = Zodiac if window?

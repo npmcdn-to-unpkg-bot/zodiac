@@ -85,7 +85,7 @@ class Renderer
           if newTruth == @_state then return else @_state = newTruth
           branchIr = if @_state then trueIr else falseIr
           @_branchComp.stop() if @_branchComp?
-          @_branchComp = if branchIr? then Z.render branchIr, @_appendTo, @_scope else null
+          @_branchComp = if branchIr? then Renderer.render branchIr, @_appendTo, @_scope else null
 
       _evalCond: (v) -> !!v
 

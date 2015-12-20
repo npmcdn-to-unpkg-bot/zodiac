@@ -272,3 +272,4 @@ Tracker.afterFlush = (f) ->
   return
 
 module.exports = Tracker
+window.Tracker = Tracker if window?

@@ -5,8 +5,11 @@
     <title>Zodiac integration tests</title>
   </head>
   <body>
-    <h4>Still loading javascript? [FAIL]</h4>
+    <h4>Still loading javascript?</h4>
     <p>Looks like something has failed or is too slow. Try having a look at the console output.</p>
-    <script src="assets/tests.js" type="text/javascript" charset="utf-8"></script>
+    <script src="pkg/tests.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" charset="utf-8">
+      document.body.innerHTML = '<p>Javascript loaded.</p>';
+    </script>
   </body>
 </html>
