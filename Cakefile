@@ -19,17 +19,20 @@ UGLIFY          = mkopts 'mangle screw_ie8'
 UGLIFY.compress = mkopts 'sequences dead_code conditionals booleans ' +
                          'unused if_return join_vars drop_console'
 
-task 'build', -> make name, false for name in BUILDS
-task 'auto',  -> make name, true  for name in BUILDS
-task 'clean', -> run 'rm pkg/*.js'
-task 'serve', ->
-  express = require('express')
-  app     = express()
-  port    = process.env.PORT || 4000;
-  app.use express.static __dirname
-  app.listen 3000
-  console.log 'Serving on localhost:3000/tests.html'
-  invoke 'auto'
+defTasks = (name) ->
+  task "#{name}:build",  -> make name, false
+  task "#{name}:auto",   -> make name, true
+  task "#{name}:clean",  -> run 'rm pkg/*.js'
+  task "#{name}:serve", ->
+    express = require('express')
+    app     = express()
+    port    = process.env.PORT || 4000
+    app.use express.static __dirname
+    app.listen 3000
+    console.log 'Serving on localhost:3000'
+    invoke "#{name}:auto"
+
+defTasks build for build in BUILDS
 
 make = (name, auto) ->
   build "src/#{name}.coffee", "pkg/#{name}", auto, -> console.log name

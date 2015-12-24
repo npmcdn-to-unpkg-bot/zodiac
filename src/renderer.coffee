@@ -1,141 +1,114 @@
 
 # TODO: refactor this mess
 
-class ReactiveFuncs
-  constructor: (value) ->
-    @value  = value
-    @dep    = new Tracker.Dependency
-    @getter = =>
-      @dep.depend()
-      console.log 'read pipe: ' + @value
-      @value
-    @setter = (v) =>
-      if v != @value
-        console.log 'write pipe: ' + @value + ' to ' + v
-        @value = v
-        @dep.changed()
-
 reactivelyIfFunc = (v, scope, processor) ->
-  Tracker.autorun =>
+  Tracker.autorun ->
     if typeof v == 'function'
-      processor(v.call(scope))
-    else processor(v)
+      val = v.call scope
+      Tracker.nonreactive -> processor val
+    else processor v
 
-class Renderer
-  @render: (ir, appendTo=document.body, scope={}) ->
-    kind  = ir[0] or throw 'empty ir given'
-    console.log kind
-    kls   = this.Render[kind.charAt(0).toUpperCase() + kind.slice(1)] or
-            throw 'invalid ir kind: ' + kind
-    new kls ir.slice(1), appendTo, scope
+Renderer =
+  render: (ir, appendTo=document.body, scope={}) ->
+    ir    = ir.slice()
+    # console.log "rendering: #{JSON.stringify ir}"
+    kind  = ir.shift() or throw 'empty ir given'
+    kls   = this.Render[kind] or throw 'invalid ir kind: ' + kind
+    kls ir, appendTo, scope
 
-  class @Render
-    class @Tag
-      constructor: (ir, @_appendTo, @_scope) ->
-        console.log ir
-        @_elm       = document.createElement(ir.shift())
-        @_comps     = []
+Renderer.Render =
+  tag: (ir, appendTo, scope) ->
+    elm   = document.createElement ir.shift() || throw 'empty ir'
+    comps = []
 
-        if ir[0]? and ir[0].constructor == Object
-          for name, value of ir.shift()
-            @_comps.push reactivelyIfFunc value, @_scope, (v) =>
-              @_elm.setAttribute(name, v)
+    # extract attributes if any
+    if ir[0]? and ir[0].constructor == Object
+      for name, value of ir.shift()
+        comps.push reactivelyIfFunc value, scope, (v) =>
+          elm.setAttribute(name, v)
 
-        @_comp = Renderer.render ir.shift(), @_elm, @_scope if ir.length > 0
-        @_appendTo.appendChild @_elm
+    comp = Renderer.render ir.shift(), elm, scope if ir.length > 0
+    appendTo.appendChild elm
+    return stop: ->
+      # console.log 'removing ' + elm.nodeName + ' tag.'
+      appendTo.removeChild(elm)
+      comp.stop() if comp
+      c.stop() for c in comps
+      null
 
-      stop: ->
-        console.log 'removing ' + @_elm.nodeName + ' tag.'
-        @_appendTo.removeChild(@_elm)
-        @_comp.stop() if @_comp
-        c.stop() for c in @_comps
+  text: (ir, appendTo, scope) ->
+    elm   = document.createTextNode ''
+    comp  = reactivelyIfFunc ir.shift(), scope, (v) ->
+      elm.nodeValue = v
+    appendTo.appendChild elm
 
-    class @Text
-      constructor: (ir, @_appendTo, @_scope) ->
-        @_elm       = document.createTextNode ''
+    return stop: ->
+      # console.log 'removing text ' + elm.nodeValue
+      comp.stop()
+      appendTo.removeChild elm
 
-        @_comp = reactivelyIfFunc ir.shift(), @_scope, (v) =>
-          console.log 'changed text node to ' + v
-          @_elm.nodeValue = v
+  seq: (ir, appendTo, scope) ->
+    comps = (Renderer.render n, appendTo, scope for n in ir)
+    return stop: ->
+      # console.log 'removing sequence'
+      c.stop() for c in comps
+      null
 
-        @_appendTo.appendChild @_elm
+  if: (ir, appendTo, scope, invert=false) ->
+    cond     = ir.shift() or throw 'missing cond'
+    trueIr   = ir.shift() or throw 'missing body'
+    falseIr  = ir.shift()
+    oldTruth = irComp = curIr = undefined
 
-      stop: ->
-        console.log 'removing text ' + @_elm.nodeValue
-        @_appendTo.removeChild(@_elm)
-        @_comp.stop()
+    condComp = reactivelyIfFunc cond, scope, (v) ->
+      newTruth = if invert then !v else !!v
+      return if newTruth == state
+      state = newTruth
+      curIr = if state then trueIr else falseIr
+      if irComp?
+        irComp.stop()
+        irComp = undefined
+      if curIr?
+        irComp = Renderer.render curIr, appendTo, scope
 
-    class @Seq
-      constructor: (ir, @_appendTo, @_scope) ->
-        @comp = Renderer.render child, @_appendTo, @_scope for child in ir
+    return stop: ->
+      condComp.stop()
+      irComp.stop() if irComp?
+      null
 
-      stop: ->
-        console.log 'removing sequence'
-        @comp.stop()
+  unless: (a, b, c) -> Renderer.Render.if(a, b, c, true)
 
-    class @If
-      constructor: (ir, @_appendTo, @_scope) ->
+  for: (ir, appendTo, scope) ->
+    varName = ir.shift() or throw 'for without varName'
+    items   = ir.shift() or throw 'for without items'
+    body    = ir.shift() or throw 'for without body'
 
-        cond       = ir.shift() or throw @constructor.name + ' without cond'
-        trueIr     = ir.shift() or throw @constructor.name + ' without body'
-        falseIr    = ir.shift()
+    branchComps = [] # the reactive render computation
+    branchVals  = [] # the reactive iteration variable
 
-        reactivelyIfFunc cond, @_scope, (v) =>
-          newTruth = @_evalCond(v)
-          if newTruth == @_state then return else @_state = newTruth
-          branchIr = if @_state then trueIr else falseIr
-          @_branchComp.stop() if @_branchComp?
-          @_branchComp = if branchIr? then Renderer.render branchIr, @_appendTo, @_scope else null
+    trim = (length) ->
+      c.stop() for c in branchComps.slice(length)
+      branchComps.length = branchVals.length = length
 
-      _evalCond: (v) -> !!v
+    itemsComp = reactivelyIfFunc items, scope, (v) ->
+      # update the stuff that is already live:
+      for i in [0...(Math.min(v.length, branchComps.length))]
+        branchVals[i].set(v[i])
 
-      stop: -> @_branchComp.stop() if @_branchComp?
+      # we're done now if the length did not change
+      return if v.length == branchComps.length
 
-    class @Unless extends @If
-      _evalCond: -> (v) -> !v
+      if v.length < branchComps.length # otherwise trim
+        trim v.length
+      else # or create new branches
+        for item in v.slice branchComps.length
+          stream = Tracker.Var(item)
+          newScope = {}
+          newScope[k] = v for k, v of scope
+          newScope[varName] = stream.get
+          branchVals.push stream
+          branchComps.push Renderer.render body, appendTo, newScope
 
-    class @Each
-      constructor: (ir, @_appendTo, @_scope) ->
-        varName = ir.shift() or throw 'each without varName'
-        items   = ir.shift() or throw 'each without items'
-        action  = ir.shift() or throw 'each without body'
-        # todo different forms, including no var, and index var..
-
-        # we keep one for each branch of..
-        @_branchComps = [] # the reactive render computation
-        @_branchVals  = [] # the iteration variable getter/setter
-
-        reactivelyIfFunc items, @_scope, (v) =>
-          Tracker.nonreactive =>
-            for i in [0...(Math.min(v.length, @_branchComps.length))]
-              @_branchVals[i].setter(v[i])
-
-          console.log 'returning' if v.length == @_branchComps.length
-          return if v.length == @_branchComps.length
-
-          if v.length < @_branchComps.length
-            @trim v.length
-          else
-            oldVal = @_scope[varName]
-            for item in v.slice(@_branchComps.length)
-              funcs = new ReactiveFuncs(item)
-              @_scope[varName] = funcs.getter
-              @_branchVals.push funcs
-              @_branchComps.push Renderer.render action, @_appendTo, @_scope
-            @_scope[varName] = oldVal
-
-      trim: (length) ->
-        c.stop() for c in @_branchComps.slice(length)
-        @_branchComps.length = @_branchVals.length = length
-
-      stop: -> @trim(0)
-
-  @nodeKinds: 'tag text seq if unless each'.split(' ')
-  @buildScope: {}
-
-  @defHelper: (name, args...) ->
-    @buildScope[name] = (args...) => args.unshift name; args
-
-  @defHelper(kind) for kind in @nodeKinds
+    return stop: -> itemsComp.stop(); trim(0)
 
 module.exports = Renderer

@@ -271,5 +271,13 @@ Tracker.afterFlush = (f) ->
   requireFlush()
   return
 
+Tracker.Var = (value) -> # Same as ReactiveVar
+  dep = new Tracker.Dependency
+  return {
+    dep: dep
+    set: (v) -> (value = v; dep.changed()) if v != value
+    get:     -> (dep.depend(); value)
+  }
+
 module.exports = Tracker
 window.Tracker = Tracker if window?

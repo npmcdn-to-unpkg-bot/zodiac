@@ -5,15 +5,9 @@
 #
 # We do not allow precompiling templates on the server, because they
 # would be harder to debug (the reactive callbacks would have to be
-# eval-ed on the client). There are is no real performance hit because
+# eval-ed on the client). There is no real performance hit because
 # of this, and Zodiac is still much faster and smaller than the major
 # reactive frameworks.
-#
-# We want to enable you to write your whole application in CoffeeScript,
-# including the templates, so that you only have to deal with one
-# type of dependency graph (CommonJS) for all your different builds.
-#
-# Just use browserify or something similar to package your scripts.
 #
 # Actually, we do something controversial here, and add a lot of
 # helpers to the global window scope, so that you get a template
@@ -41,7 +35,7 @@ $ = # IR node names
   seq:    'seq'
   if:     'if'
   unless: 'unless'
-  each:   'each'
+  for:   'for'
 
 _parseItem = (e) ->
   switch e.constructor
@@ -87,7 +81,8 @@ Template =
     _if:      -> _ifImpl($.if,     arguments...)
     _unless:  -> _ifImpl($.unless, arguments...)
     _else:    _elseVal
-    _each:    -> (v, arr, seq...) -> [$.each, v, arr, _parseList(seq)]
+    _for:    (v, arr, seq...) -> [$.for, v, arr, _parseList(seq)]
+    out:     (args...) -> args.unshift('text'); args
 
     Z: -> _parseList(arguments) # Template definition function
 

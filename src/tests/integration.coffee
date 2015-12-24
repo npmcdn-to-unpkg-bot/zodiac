@@ -20,7 +20,12 @@ Examples =
   a: Z ul li('simple list')
   b: Z div {class: 'funky', 'data-id': ticker.get},
     p {class: ticker.get}, 'List with ticker:'
-    ul(li 'first element', li ticker.get)
+    ul {},
+      li 'first element'
+      li {},
+        out ticker.get
+        span ' ..'   # TODO: v is referenced after reset. clone scopes.
+    ul _for 'v', [1,2,3], li -> @v() + ticker.get()
     footer {}, p 'Footer after the list.' # TODO: not properly destroyed.
 
   c: Z _if (-> ticker.get() % 2 == 0), (-> ticker.get()), _else, 'no'
@@ -36,10 +41,14 @@ exports.run = ->
 
 window.run = ->
   console.log 'integration'
-  # a = Zodiac.render Examples.a
+  a = Zodiac.render Examples.a
   # a.stop()
   b = Zodiac.render Examples.b
   #b.stop()
-  #Zodiac.render Examples.c
+  c = Zodiac.render Examples.c
+  d = Zodiac.render Examples.d
+  return stop: ->
+    x.stop() for x in [a, b, c, d]
+    null
 
 
