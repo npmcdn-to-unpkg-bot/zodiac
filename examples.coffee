@@ -4,6 +4,9 @@ require './src/template'
 # TODO
 
 
+
+
+
 exports[5] = Z _each 'n', [1,2,3,4], hr()
 exports[6] = Z _each 'n', [1,2,3,4], p -> @n()
 exports[7] = Z ul _each 'n', (-> Session.get 'items'), li -> @n()

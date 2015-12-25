@@ -1,1 +1,9 @@
-- for_index 'e', 'i', [a, b, c], ...
+- Copy over and adapt reactive classes:
+  - router
+  - hash
+- Fix todos
+- Proper-ish README
+- Inverted Pyramid Coffee Sheets
+- Reactive client/server protocol
+- Homepage
+- _for_i 'e', 'i', [a, b, c], ...

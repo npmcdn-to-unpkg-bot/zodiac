@@ -10,9 +10,9 @@ reactivelyIfFunc = (v, scope, processor) ->
 
 Renderer =
   render: (ir, appendTo=document.body, scope={}) ->
+    return ir.render appendTo, scope if ir.render?
     ir    = ir.slice()
-    # console.log "rendering: #{JSON.stringify ir}"
-    kind  = ir.shift() or throw 'empty ir given'
+    kind  = ir.shift()        or throw 'empty ir given'
     kls   = this.Render[kind] or throw 'invalid ir kind: ' + kind
     kls ir, appendTo, scope
 
@@ -21,11 +21,18 @@ Renderer.Render =
     elm   = document.createElement ir.shift() || throw 'empty ir'
     comps = []
 
-    # extract attributes if any
+    # extract attributes snd events if any
     if ir[0]? and ir[0].constructor == Object
       for name, value of ir.shift()
-        comps.push reactivelyIfFunc value, scope, (v) =>
-          elm.setAttribute(name, v)
+        if name[0] == '$'
+          name      = name.slice(1)
+          listener  = (event) -> value.call(scope, event)
+          if elm.addEventListener
+            elm.addEventListener name, listener, false
+          else elm.attachEvent "on#{name}", listener
+        else
+          comps.push reactivelyIfFunc value, scope, (v) ->
+            elm.setAttribute(name, v)
 
     comp = Renderer.render ir.shift(), elm, scope if ir.length > 0
     appendTo.appendChild elm
