@@ -19,10 +19,11 @@ UGLIFY          = mkopts 'mangle screw_ie8'
 UGLIFY.compress = mkopts 'sequences dead_code conditionals booleans ' +
                          'unused if_return join_vars drop_console'
 
+task "clean",  -> run 'rm pkg/*.js'
+
 defTasks = (name) ->
   task "#{name}:build",  -> make name, false
   task "#{name}:auto",   -> make name, true
-  task "#{name}:clean",  -> run 'rm pkg/*.js'
   task "#{name}:serve", ->
     express = require('express')
     app     = express()

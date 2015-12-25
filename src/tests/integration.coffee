@@ -1,18 +1,6 @@
 
 Zodiac = require '../zodiac'
 
-class ReactiveTicker
-  constructor: (@interval=1000) ->
-    @dep     = new Zodiac.Tracker.Dependency
-    @counter = 0
-    cb = =>
-      @counter += 1
-      @dep.changed()
-    @timer = window.setInterval cb, @interval
-
-  get: =>
-    @dep.depend()
-    @counter
 
 hello = -> console.log "hello"
 
@@ -25,7 +13,7 @@ Components.Welcome = Zodiac.component
       # extract them, and add event listeners as per SO
   init: (scope) -> console.log 'component initialized'
 
-ticker = new ReactiveTicker
+ticker = Trax.ticker()
 
 Examples = 
   a: Z ul li('simple list')
@@ -35,9 +23,9 @@ Examples =
       li 'first element'
       li {},
         ticker.get
-        span ' ..'   # TODO: v is referenced after reset. clone scopes.
+        span ' ..'
     ul _for 'v', [1,2,3], li -> @v() + ticker.get()
-    footer {}, p 'Footer after the list.' # TODO: not properly destroyed.
+    footer {}, p 'Footer after the list.'
 
   c: Z p _if (-> ticker.get() % 2 == 0), (-> ticker.get()), _else, 'no'
   d: Z p {},
@@ -52,9 +40,9 @@ exports.run = ->
 
 window.run = ->
   console.log 'integration'
-  #a = Zodiac.render Examples.a
-  # a.stop()
-  # b = Zodiac.render Examples.b
+  a = Zodiac.render Examples.a
+  #a.stop()
+  b = Zodiac.render Examples.b
   #b.stop()
   c = Zodiac.render Examples.c
   d = Zodiac.render Examples.d
@@ -62,5 +50,3 @@ window.run = ->
   return stop: ->
     x.stop() for x in [a, b, c, d, e]
     null
-
-

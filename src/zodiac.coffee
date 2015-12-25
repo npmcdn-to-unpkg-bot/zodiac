@@ -1,28 +1,17 @@
 
-Template = require './template'
-Renderer = require './renderer'
-Tracker  = require './tracker'
+Trax     = require 'trax'
+Scorpio  = require 'scorpio'
 
 Zodiac =
-  Template: Template
-  Renderer: Renderer
-  Tracker:  Tracker
-  Z:        Template.DSL.Z
-  render: -> Zodiac.Renderer.render arguments...
+  Trax:      Trax
+  Template:  Scorpio.Template
+  Renderer:  Scorpio.Renderer
+  Z:         Scorpio.template
+  render:    Scorpio.render
+  component: Scorpio.component
 
-  component: (params) ->
-    throw 'missing template' unless params.template?
-    {template, init} = params
-    template = Template.DSL.Z params.template
-    delete params[field] for field in 'template init'.split(' ')
-
-    return render: (appendTo=document.body, scope={}) ->
-      newScope    = {}
-      newScope[k] = v for k, v of scope
-      newScope[k] = v for k, v of params
-      init(scope) if init?
-      Renderer.render template, appendTo, newScope
-
+if window?
+  window.Zodiac  = Zodiac
+  window.Z       = Zodiac.Z
 
 module.exports = Zodiac
-window.Zodiac  = Zodiac if window?

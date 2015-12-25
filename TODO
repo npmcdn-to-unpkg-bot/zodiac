@@ -1,9 +1,10 @@
-- Copy over and adapt reactive classes:
-  - router
-  - hash
+
+- Taurus: Inverted Pyramid Coffee Sheets
+- move browserify stuff to sample, maybe implement a builder.
+- Integrate the reactive router
+- Make an example app with browserify
 - Fix todos
 - Proper-ish README
-- Inverted Pyramid Coffee Sheets
 - Reactive client/server protocol
 - Homepage
 - _for_i 'e', 'i', [a, b, c], ...
