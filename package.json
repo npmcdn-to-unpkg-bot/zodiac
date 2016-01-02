@@ -26,8 +26,9 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "trax":     ">= 0.1.2",
-    "scorpio":  ">= 0.1.3"
+    "trax":          ">= 0.1.2",
+    "scorpio":       ">= 0.1.3",
+    "coffee-sheets": ">= 0.1.4"
   },
   "devDependencies": {
     "coffee-script": ">= 1.1",

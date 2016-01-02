@@ -1,10 +1,10 @@
 
-- Taurus: Inverted Pyramid Coffee Sheets
-- move browserify stuff to sample, maybe implement a builder.
 - Integrate the reactive router
+- Have reactive router support subpaths
+- move browserify stuff to sample, maybe implement a builder.
 - Make an example app with browserify
 - Fix todos
 - Proper-ish README
-- Reactive client/server protocol
+- Reactive subscriptions? live views with json/bson?
 - Homepage
-- _for_i 'e', 'i', [a, b, c], ...
+- _for_index 'e', 'i', [a, b, c], ...

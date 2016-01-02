@@ -5,19 +5,27 @@ Zodiac = require '../zodiac'
 hello = -> console.log "hello"
 
 Components = {}
-Components.Welcome = Zodiac.component
+Components.Welcome = Zodiac.component 'welcome',
+  # init_css:       {}
+  tags_css:
+    body:
+      background_color: 'red'
+  # classes_css:    {}
+  objects_css:    {}
+  # overrides_css:  {}
   template: div {class: 'wrapper'},
     div {class: "container"},
-      p $click: hello, "Click me and check console."
-      # TODO: don't evaluate event handlers automatically..
-      # extract them, and add event listeners as per SO
-  init: (scope) -> console.log 'component initialized'
+      p $click: hello,
+        "Click me and check console.",
+        a {href: '//s.jostein.be/foo'}, "foo!"
+  init:  () -> console.log 'component initialized'
+  render: (appendTo, scope) -> console.log 'component rendered to ' + appendTo
 
 ticker = Trax.ticker()
 
 Examples = 
-  a: Z ul li('simple list')
-  b: Z div {class: 'funky', 'data-id': ticker.get},
+  a: Z.template ul li('simple list')
+  b: Z.template div {class: 'funky', 'data-id': ticker.get},
     p {class: ticker.get}, 'List with ticker:'
     ul {},
       li 'first element'
@@ -27,12 +35,12 @@ Examples =
     ul _for 'v', [1,2,3], li -> @v() + ticker.get()
     footer {}, p 'Footer after the list.'
 
-  c: Z p _if (-> ticker.get() % 2 == 0), (-> ticker.get()), _else, 'no'
-  d: Z p {},
+  c: Z.template p _if (-> ticker.get() % 2 == 0), (-> ticker.get()), _else, 'no'
+  d: Z.template p {},
     _unless (-> ticker.get() % 3 != 0),
       span -> ticker.get()
       _else
-      'nope'
+      -> 'yo, ' + App.path.pathTokens()
 
 window.integrationExamples = Examples if window?
 
@@ -40,13 +48,17 @@ exports.run = ->
 
 window.run = ->
   console.log 'integration'
-  a = Zodiac.render Examples.a
+  a = Z.render Examples.a
   #a.stop()
-  b = Zodiac.render Examples.b
+  b = Z.render Examples.b
   #b.stop()
-  c = Zodiac.render Examples.c
-  d = Zodiac.render Examples.d
-  e = Zodiac.render Components.Welcome
+  c = Z.render Examples.c
+  d = Z.render Examples.d
+  e = Z.render Components.Welcome
   return stop: ->
     x.stop() for x in [a, b, c, d, e]
     null
+
+
+
+
