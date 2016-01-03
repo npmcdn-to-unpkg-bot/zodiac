@@ -41,7 +41,7 @@ In order to minimize unpredictable rule overrides depending on order of requiry,
 
 Why would anyone use CoffeeScript to write CSS? Mostly to make the styles part of the same dependency graph as the rest of the code, but also potentially in order to delay the loading of styles until those styles are actually needed.
 
-## Templates
+### Templates
 
 - No HTML internally, only DOM methods! No stupid tree diff!
 - No uneccessary redraws (separation of reactive content is preserved, even through for-statements, thanks to a reactive iteration variable)

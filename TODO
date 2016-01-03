@@ -1,9 +1,8 @@
 
-- Integrate the reactive router
+- extract zodiac-build?
+
 - Have reactive router support subpaths
-- move browserify stuff to sample, maybe implement a builder.
-- Make an example app with browserify
-- Fix todos
+- Move browserify stuff to example app
 - Proper-ish README
 - Reactive subscriptions? live views with json/bson?
 - Homepage
