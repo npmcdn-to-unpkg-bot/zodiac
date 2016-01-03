@@ -1,4 +1,5 @@
 
+return unless window?
 Trax = require 'trax'
 
 trimSlashes = (str) ->

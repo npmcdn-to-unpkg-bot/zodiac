@@ -1,5 +1,6 @@
 
 Path = require './reactive/path'
+Trax = require 'trax'
 
 Reactive =
   Path:   Path

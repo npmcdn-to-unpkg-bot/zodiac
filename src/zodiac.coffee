@@ -1,7 +1,7 @@
 
-Trax     = require 'trax'
-Scorpio  = require 'scorpio'
-Sheets   = require 'coffee-sheets'
+Trax     = require './trax'
+Scorpio  = require './scorpio'
+Sheets   = require './coffee-sheets'
 Reactive = require './reactive'
 
 Zodiac =
@@ -37,12 +37,11 @@ Zodiac =
         view.stop() if view?
         cbView.stop() if cbView? and cbView.stop?
 
-  App:
-    path:     new Reactive.Path
-    alerts:   Reactive.alerts()
-
 if window?
   window.Zodiac = window.Z = Zodiac
-  window.App    = Zodiac.App
+
+  window.App = Zodiac.App =
+    path:     new Reactive.Path
+    alerts:   Reactive.alerts()
 
 module.exports = Zodiac

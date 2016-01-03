@@ -1,5 +1,4 @@
 
-log = console.log
 
 fs            = require 'fs'
 {spawn, exec} = require 'child_process'
@@ -10,37 +9,41 @@ UglifyJS      = require 'uglify-js'
 
 mkopts = (str, r={}) -> r[s] = true for s in str.split(' '); r
 
-# Config
+DEFAULT_OPTS =
+  browserify:   {debug: true, extensions: ['.coffee']}
+  watchify:     {cache: {}, packageCache: {}, plugin: [Watchify]}
+  uglify:       mkopts 'mangle screw_ie8'
 
-BUILDS          = ['zodiac', 'tests']
-BROWSERIFY      = {debug: true, extensions: ['.coffee']}
-WATCHIFY        = {cache: {}, packageCache: {}, plugin: [Watchify]}
-UGLIFY          = mkopts 'mangle screw_ie8'
-UGLIFY.compress = mkopts 'sequences dead_code conditionals booleans ' +
-                         'unused if_return join_vars drop_console'
+DEFAULT_OPTS.uglify.compress =
+  mkopts 'sequences dead_code conditionals booleans ' +
+         'unused if_return join_vars drop_console'
 
 task "clean",  -> run 'rm pkg/*.js'
 
-defTasks = (name) ->
-  task "#{name}:build",  -> make name, false
-  task "#{name}:auto",   -> make name, true
-  task "#{name}:serve", ->
-    express = require('express')
-    app     = express()
-    port    = process.env.PORT || 4000
-    app.use express.static __dirname
-    app.listen 3000
-    console.log 'Serving on localhost:3000'
-    invoke "#{name}:auto"
+defTasks = (names, opts={}) ->
+  for k, v of DEFAULT_OPTS
+    opts[k] = v unless opts[k]?
+  for name in names
+    src = "src/#{name}.coffee"
+    pkg = "pkg/#{name}"
+    task "#{name}:build", -> build src, pkg, opts
+    task "#{name}:auto",  ->
+      opts.auto = true
+      build src, pkg, opts
+    task "#{name}:serve", ->
+      express = require('express')
+      app     = express()
+      port    = 3000 or opts.port
+      app.use express.static __dirname
+      app.listen port
+      console.log "Serving on localhost:#{port}"
+      invoke "#{name}:auto"
 
-defTasks build for build in BUILDS
+defTasks ['zodiac', 'tests']
 
-make = (name, auto) ->
-  build "src/#{name}.coffee", "pkg/#{name}", auto, -> console.log name
-
-build = (entry, target, auto=false, onBuild) ->
-  opts = BROWSERIFY
-  opts[k] = v for k, v of WATCHIFY if auto
+build = (entry, target, opts={}) ->
+  opts = opts.browserify
+  opts[k] = v for k, v of opts.watchify if opts.auto
   b = Browserify opts
   b.transform(Coffeeify)
   b.add entry
@@ -49,9 +52,9 @@ build = (entry, target, auto=false, onBuild) ->
     b.bundle (error, js) ->
       throw error if error?
       fs.writeFileSync plain, js
-      fs.writeFileSync mini, UglifyJS.minify(plain, UGLIFY).code
-      onBuild() if onBuild?
-  b.on 'update', cb if auto
+      fs.writeFileSync mini, UglifyJS.minify(plain, opts.uglify).code
+      console.log "BUILD #{entry} -> #{target}"
+  b.on 'update', cb if opts.auto
   cb()
 
 run = (command, cb=null) ->
