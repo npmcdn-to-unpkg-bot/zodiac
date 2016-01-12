@@ -29,9 +29,9 @@ Zodiac has some chosen limitations:
 - Client side only
 - IE9 and later (no support whatsoever for legacy browsers)
 
-Zodiac lets you write a whole web app (including html, css, and reactive components) using only CoffeeScript. This makes builds really simple, because you only have to deal with one dependency graph (CommonJS), and you can package all your code using the same tool, for instance Browserify. Whenever your script depends on a template or some css, you just require it like you would require a script.
+Zodiac lets you write a whole web app (including html, css, and reactive components) using only CoffeeScript. This makes builds really simple, because you only have to deal with one dependency graph (such as CommonJS), and you can package all your code using the same tool, for instance Browserify. Whenever your script depends on a template or some css, you just require it like you would require a script, because that's what it is.
 
-You declare your reactive computational dependencies as part of your client side application logic, then simply use these reactive functions in your templates, which will update the dom dynamically to reflect reactive changes in the application data. Wahoooo! Routes are simply reactive mappings from the URL structure to variables that you define. Very easy!
+You declare your reactive computational dependencies as part of your client side application logic, then simply use these reactive functions in your templates, which will update the dom dynamically to reflect reactive changes in the application data. Routes are simply reactive mappings from the URL structure to variables that you define.
 
 **Work in progress. Documentation is coming.**
 
@@ -45,5 +45,5 @@ Why would anyone use CoffeeScript to write CSS? Mostly to make the styles part o
 
 ### Templates
 
-- No HTML internally, only DOM methods. No stupid tree diff. No html code.
+- No HTML internally, only DOM methods. No diffing needed!
 - No uneccessary redraws (separation of reactive content is preserved, even through for-statements, thanks to a reactive iteration variable)
