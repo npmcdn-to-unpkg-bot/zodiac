@@ -1,17 +1,16 @@
 
-return unless window?
-Trax = require 'trax'
-
 trimSlashes = (str) ->
   str.toString().replace /(\/+$)|(^\/+)/g, ''
 
 interceptLocalClicks = (cb) ->
   document.addEventListener 'click', (e) ->
-    console.log e
     if e.target.host == location.host
       cb e.target.href.replace(/^.*\/\/[^\/]+/, '')
       e.preventDefault()
 
+# TODO: refactor, make sure hashchange works
+
+R = Z.Reactive
 
 class Path
   @Adapters:
@@ -52,7 +51,7 @@ class Path
       adapter.defaults.call opts
       @_adapter  = adapter
       @_opts     = opts
-      @_pathDep = new Trax.Dependency()
+      @_pathDep = new R.Dependency()
       @_adapter.onChange => @_pathDep.changed()
 
     path_kind: -> @_adapter.kind()
@@ -101,7 +100,7 @@ class Path
     back:             -> window.history.back()
 
     _intercept: (cb) ->
-      Trax.autorun =>
+      R.autorun =>
         if @pathTokens().length > 0 then cb @pathTokens()
 
   # Must only be called once. Sets up listeners, click interceptors and
@@ -142,13 +141,13 @@ class Router extends Path
   routes: (routeMap) ->
     @routeMap = routeMap
     @_computation.stop() if @_computation?
-    @_computation = Trax.autorun =>
+    @_computation = R.autorun =>
       newVars =  @_matcher(@pathTokens(), @routeMap, {})
       @_setVar k, v          for k, v of newVars
       @_setVar k, newVars[k] for k, v of @_vars
 
   _getDep: (key) ->
-    @_varDeps[key] or= new Trax.Dependency
+    @_varDeps[key] or= new R.Dependency
     @_varDeps[key]
 
   _setVar: (key, value) ->
@@ -174,7 +173,9 @@ class Router extends Path
   # consuming path fragments while populating the
   # params obejct.
   _matcher: (frags, branch, params) ->
-    params = _.clone params
+    newParams = {}
+    newParams[k] = v for k, v of params
+    params = newParams
 
     runFn = (fn) -> fn.call params
 
@@ -213,4 +214,4 @@ class Router extends Path
     # 7. no match
     return false
 
-module.exports = Router
+Z.Reactive.Path = Router

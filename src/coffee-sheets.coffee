@@ -1,5 +1,5 @@
 
-CoffeeSheets =
+Z.Sheets =
   levels: 'init tags classes objects overrides'.split ' '
   tag: (rule) ->
     elm = document.createElement 'style'
@@ -14,13 +14,13 @@ CoffeeSheets =
     return push: push
 
   init: (names...) ->
-    return if CoffeeSheets.initialized?
-    CoffeeSheets.initialized = true
-    for name in CoffeeSheets.levels
-      CoffeeSheets[name] = CoffeeSheets.tag "/* #{name} */"
+    return if Z.Sheets.initialized?
+    Z.Sheets.initialized = true
+    for name in Z.Sheets.levels
+      Z.Sheets[name] = Z.Sheets.tag "/* #{name} */"
     null
 
-class CoffeeSheets.Sheet
+class Z.Sheets.Sheet
   constructor: (@name, @groups) ->
     @active = false
 
@@ -29,20 +29,16 @@ class CoffeeSheets.Sheet
     @active = true
     for level, styles of @groups
       for selector, rules of styles
-        unless CoffeeSheets[level]?
+        unless Z.Sheets[level]?
           throw "invalid level #{level} or coffee sheets not initialized"
-        CoffeeSheets[level].push "/* #{@name} */"
-        CoffeeSheets[level].push "#{selector} {"
+        Z.Sheets[level].push "/* #{@name} */"
+        Z.Sheets[level].push "#{selector} {"
         for prop, val of rules
           prop = prop.replace '_', '-'
-          CoffeeSheets[level].push "#{prop}: #{val};"
-        CoffeeSheets[level].push "}"
+          Z.Sheets[level].push "#{prop}: #{val};"
+        Z.Sheets[level].push "}"
     null
 
-CoffeeSheets.create = -> new CoffeeSheets.Sheet arguments...
+Z.Sheets.create = -> new Z.Sheets.Sheet arguments...
 
-if window?
-  window.addEventListener "DOMContentLoaded", ->
-    CoffeeSheets.init()
-
-module.exports = CoffeeSheets
+document.addEventListener "DOMContentLoaded", -> Z.Sheets.init()
