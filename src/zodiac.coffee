@@ -99,6 +99,24 @@ Z.template = do ->
 # template from the dom.
 Z.render = do ->
 
+  # if's and for's need a point from which to render in order to not
+  # lose ordering as nodes come and go through the recursive structure
+  _makeFixture = (appendTo) ->
+      fixture = 
+      # TODO: use a span instead if appendTo is inline
+      wrappingStyles = appendTo.currentStyle or window.getComputedStyle(appendTo, "")
+      fixture = document.createElement switch wrappingStyles.display
+        when /inline/, 'table-cell' then 'span'
+        else 'div'
+      appendTo.appendChild fixture
+      return {
+        elm: fixture
+        currentStyle: wrappingStyles
+        remove: -> appendTo.removeChild fixture
+        appendChild: (elm) -> fixture.appendChild elm
+        removeChild: (elm) -> fixture.removeChild elm
+      }
+
   _reactivelyIfFunc = (v, scope, processor) ->
     Z.Reactive.autorun ->
       if typeof v == 'function'
@@ -162,6 +180,7 @@ Z.render = do ->
       trueIr   = ir.shift() or throw 'missing body'
       falseIr  = ir.shift()
       oldTruth = irComp = curIr = undefined
+      fixture  = _makeFixture appendTo
 
       condComp = _reactivelyIfFunc cond, scope, (v) ->
         newTruth = if invert then !v else !!v
@@ -172,11 +191,12 @@ Z.render = do ->
           irComp.stop()
           irComp = undefined
         if curIr?
-          irComp = _ref.render curIr, appendTo, scope
+          irComp = _ref.render curIr, fixture, scope
 
       return stop: ->
         condComp.stop()
         irComp.stop() if irComp?
+        fixture.remove()
         null
 
     unless: (a, b, c) -> _renderers.if(a, b, c, true)
@@ -185,6 +205,7 @@ Z.render = do ->
       varName = ir.shift() or throw 'for without varName'
       items   = ir.shift() or throw 'for without items'
       body    = ir.shift() or throw 'for without body'
+      fixture = _makeFixture appendTo
 
       branchComps = [] # the reactive render computation
       branchVals  = [] # the reactive iteration variable
@@ -210,9 +231,13 @@ Z.render = do ->
             newScope[k] = v for k, v of scope
             newScope[varName] = stream.get
             branchVals.push stream
-            branchComps.push _ref.render body, appendTo, newScope
+            branchComps.push _ref.render body, fixture, newScope
 
-      return stop: -> itemsComp.stop(); trim(0)
+      return stop: ->
+        itemsComp.stop()
+        trim(0)
+        fixture.remove()
+        null
 
   _ref.render = (ir, appendTo=document.body, scope={}) ->
     return ir.render appendTo, scope if ir.render?
