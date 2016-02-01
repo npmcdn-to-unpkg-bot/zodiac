@@ -26,9 +26,9 @@ Z.Reactive.autorun ->
 Components = {}
 Components.Welcome = Zodiac.component 'welcome',
   # init_css:       {}
-  tags_css:
-    body:
-      background_color: 'red'
+  tags_css: {}
+  # body:
+  #   background_color: 'red'
   # classes_css:    {}
   # objects_css:    {}
   # overrides_css:  {}
@@ -54,7 +54,10 @@ Examples =
       li {},
         ticker.get
         span ' ..'
-    ul _for 'v', [1,2,3], li -> @v() + ticker.get()
+    ul {},
+      _for 'v', (-> [1..ticker.get()]),
+        _if (-> (@v() + ticker.get()) % 2 == 0),
+          li (-> @v())
     footer {}, p 'Footer after the list.'
 
   c: Z.template p _if (-> ticker.get() % 2 == 0), (-> ticker.get()), _else, 'no'
@@ -67,8 +70,7 @@ Examples =
   # _for constructs:
   e: Z.template _for 'n', [1,2,3,4], hr()
   f: Z.template _for 'n', [1,2,3,4], p -> @n()
-  g: Z.template ul _for 'n', (-> [0..ticker.get()]), li -> @n()
-  h: Z.template _if (-> true),
+  g: Z.template _if (-> true),
     p {class: 'greet'}, 'hello'
     _else
     p {class: 'bye'}, 'bye'
@@ -101,11 +103,10 @@ window.run = ->
   e = Z.render Examples.e
   f = Z.render Examples.f
   g = Z.render Examples.g
-  h = Z.render Examples.h
 
   component = Z.render Components.Welcome
   return stop: ->
-    x.stop() for x in [a, b, c, d, e, f, g, h, component]
+    x.stop() for x in [a, b, c, d, e, f, g, component]
     null
 
 
