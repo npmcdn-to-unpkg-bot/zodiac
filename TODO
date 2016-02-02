@@ -1,4 +1,7 @@
 
+In order to eliminate the fixture div tags, I have to maintain some kind of
+linked list for the flow, and use that to do updates. sounds possible.
+
 - extract zodiac-build?
 
 - Have reactive router support subpaths
