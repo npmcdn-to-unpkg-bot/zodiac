@@ -3,7 +3,7 @@
 # This is Meteor Tracker, ripped from the Meteor platform, converted to
 # coffee, trimmed and slightly rewritten.
 
-R = Z.Reactive =
+R =
   active:             false
   currentComputation: null
   _computations:      {}
@@ -376,3 +376,7 @@ R.alerts = ->
     fail:     (msg) -> put 'danger',  msg
     error:    (msg) -> put 'danger',  msg
     }
+
+
+module.exports = R
+

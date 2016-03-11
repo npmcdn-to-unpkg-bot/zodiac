@@ -1,0 +1,26 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Zodiac Test Runner</title>
+    <link rel="stylesheet" href="../node_modules/mocha/mocha.css">
+  </head>
+  <body>
+    <div id="fixture">
+      <h4>Still loading javascript?</h4>
+      <p>Looks like something has failed or is too slow. Try having a look at the console output.</p>
+    </div>
+    <div id="mocha"></div>
+    <script src="../node_modules/mocha/mocha.js"></script>
+    <script>
+      f = document.getElementById("fixture");
+      f.innerHTML = ""
+      mocha.ui('bdd');
+      mocha.reporter('html');
+    </script>
+    <script src="../pkg/test.js"></script>
+    <script>
+      mocha.run();
+    </script>
+  </body>
+</html>

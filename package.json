@@ -23,11 +23,14 @@
   "repository": "jbe/zodiac.git",
   "scripts": {
     "prepublish": "cake build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "cake test:build && node_modules/.bin/mocha-phantomjs ./test/index.html"
   },
   "dependencies": {
   },
   "devDependencies": {
+    "mocha":         ">= 2.4",
+    "mocha-phantomjs":        "*",
+    "should":        "*",
     "coffee-script": ">= 1.1",
     "browserify":    ">= 12",
     "coffeeify":     ">= 1",

@@ -10,7 +10,9 @@ interceptLocalClicks = (cb) ->
 
 # TODO: refactor, make sure hashchange works
 
-R = Z.Reactive
+# TODO: mountPath as parameter
+
+R = require "./reactive"
 
 class Path
   @Adapters:
@@ -214,4 +216,4 @@ class Router extends Path
     # 7. no match
     return false
 
-Z.Reactive.Path = Router
+module.exports = Router

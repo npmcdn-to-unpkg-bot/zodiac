@@ -1,5 +1,3 @@
-
-
 fs            = require 'fs'
 {spawn, exec} = require 'child_process'
 Browserify    = require 'browserify'
@@ -39,7 +37,7 @@ defTasks = (names, opts={}) ->
       console.log "Serving on localhost:#{port}"
       invoke "#{name}:auto"
 
-defTasks ['zodiac', 'tests']
+defTasks ['zodiac', 'test']
 
 build = (entry, target, opts={}) ->
   opts = opts.browserify
