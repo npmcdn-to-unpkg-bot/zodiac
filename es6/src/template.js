@@ -1,27 +1,6 @@
 
 let tracker = require("./tracker");
 
-// All the dom-producing functions, like text, tag, html, and h2, have a create-mount-destroy which always happens in that order, and only once per instance. The creator is a function returning a mounter, and the mounter is a function returning a destructor. The creator can take any number of parameters, depending of the kind of dom it produces. The mounter always takes one or two parameters; the parent dom node, and an optional dom node within the parent to insert itself before. The destructor never takes any parameters. As you can see, this lifecycle is expressed in terms of nested closures inside the outer constructor function. Beautiful!
-
-function text(str) {
-  if (typeof(str) == "function") {
-    var dom = document.createTextNode("hello");
-    var comp = tracker.autorun(function () {
-      dom.nodeValue = str();
-    });
-  }
-  else {
-    var dom = document.createTextNode(str);
-  }
-
-  return function (mount, pos) {
-    mount.insertBefore(dom, pos);
-    return function () {
-      if (typeof(str) == "function") comp.stop();
-      mount.removeChild(dom);
-    }
-  }
-}
 
 function _is(obj, kind) {
   let toString = Object.prototype.toString;
@@ -35,61 +14,134 @@ function tagify(obj) {
     if (obj.length != 1) throw("Wrong array length in template.");
     return text(obj[0]);
   }
+  console.log(obj);
   throw("Invalid data in template (logged to console).");
 }
 
-function html(...children) {
-  // list of tagified children
-  let mounters = children.map(c => tagify(c));
+function text(str) {
+  return function (parentFlow) {
+    let comp, isReactive = typeof(str) == "function";
 
-  return function (mount, pos) {
-    let destructors = mounters.map((m) => m(mount, pos));
-
-    return function () { // destroy
-      comp.stop();
-      mount.removeChild(dom);
-      for (var d of destructors) d()
+    function autorun() {
+      if (isReactive)
+        comp = tracker.autorun(function () {
+          dom.nodeValue = str();
+        });
     }
+
+    let dom = isReactive ? document.createTextNode("") :
+                           document.createTextNode(str);
+    autorun();
+
+    let leaf = parentFlow.branch(dom);
+
+    return function () { // toggle
+      if (comp && !comp.stopped) comp.stop()
+      else if (isReactive)       autorun(dom);
+      leaf.toggle();
+    }
+  }
+}
+
+function html(...children) {
+  let mounters = children.map(c => tagify(c));
+  return function (parentFlow) {
+    let togglers = mounters.map((m) => m(parentFlow));
+    // console.log(togglers);
+    return function () { for (var t of togglers) t(); }
   }
 }
 
 function tag(name, ...children) {
   "use strict";
 
-  let attrs = {};
+  let attrs        = {};
+  let events       = {};
   if (typeof(children[0]) == "object") attrs = children.shift();
+  let childMounter = html(...children);
 
-  let dom             = document.createElement(name);
-  let childMounter    = html(...children);
-  let childDestructor = childMounter(dom);
-  let comps           = [];
+  return function (parentFlow) {
+    let comps, dom = document.createElement(name);
+    let branch = parentFlow.branch(dom);
 
-  Object.keys(attrs).forEach(function (k) {
-    let v = attrs[k];
+    Object.keys(attrs).forEach(function (k) {
+      if (_is(attrs[k], "Array")) { }
+      else if (k[0] == "$" || k[0] == "_") {
+        let name = k.slice(1);
+        dom.addEventListener(name, attrs[k], k[0] == "$");
+      }
+      else dom.setAttribute(k, attrs[k]);
+    });
 
-    if (_is(v, "Array")) {
-      comps.push(tracker.autorun(function () {
-        let str = v.map(i => typeof(i) == "function" ? i() : i).join("");
-        dom.setAttribute(k, str);
-      }));
+    function autorun() {
+      comps = [];
+      Object.keys(attrs).forEach(function (k) {
+        if (_is(attrs[k], "Array")) {
+          comps.push(tracker.autorun(function () {
+            let str = attrs[k].map(function (i) {
+              return typeof(i) == "function" ? i() : i
+            }).join("");
+            dom.setAttribute(k, str);
+          }));
+        }
+      });
     }
-    else dom.setAttribute(k, v);
-  });
+    autorun();
+    let childToggler = childMounter(branch);
 
-  return function (mount, pos) {
-    mount.insertBefore(dom, pos);
-
-    return function () { // destroy
-      for (var c of comps) c.stop();
-      mount.removeChild(dom);
-      childDestructor();
+    return function () {
+      if (comps.length > 0 && comps[0].stopped) autorun();
+      else for (var c of comps) c.stop();
+      branch.toggle();
+      childToggler();
     }
   }
 }
 
-let tags = 'a abbr address article aside audio b bdi bdo blockquote body button canvas caption cite code colgroup datalist dd del details dfn div dl dt em fieldset figcaption figure footer form h1 h2 h3 h4 h5 h6 head header hgroup html i iframe ins kbd label legend li map mark menu meter nav noscript object ol optgroup option output p pre progress q rp rt ruby s samp script section select small span strong style sub summary sup table tbody td textarea tfoot th thead time title tr u ul video applet acronym bgsound dir frameset noframes isindex area base br col command embed hr img input keygen link meta param source track wbr basefont frame applet acronym bgsound dir frameset noframes isindex listing nextid noembed plaintext rb strike xmp big blink center font marquee multicol nobr spacer tt basefont frame'.split(" ");
+function cond(check, a, b) {
+  a = tagify(a);
+  if (b) b = tagify(b);
 
-module.exports = {html, tag, text}
+  return function (parentFlow) {
+
+    let newState, curState;
+    let aToggler = a(parentFlow);
+    let bToggler = b(parentFlow);
+
+    // TODO: don't automatically toggle on across architecture...
+    // so that we don't have to flash b.
+    newState = check();
+    if (!newState)     aToggler();
+    if (newState && b) bToggler();
+
+    let comp;
+
+    function autorun() {
+      comp = tracker.autorun(function () {
+        newState = check();
+        if (newState != curState) {
+          if (b) bToggler();
+          aToggler();
+          curState = newState;
+        }
+      });
+    }
+
+    autorun();
+
+    return function () { // toggle
+      if (comp.stopped) autorun()
+      else comp.stop();
+      if (check()) aToggler()
+      else if (b)  bToggler();
+    }
+  }
+}
+
+// html, head and body are not included.
+let tags = 'a abbr address article aside audio b bdi bdo blockquote button canvas caption cite code colgroup datalist dd del details dfn div dl dt em fieldset figcaption figure footer form h1 h2 h3 h4 h5 h6 header hgroup i iframe ins kbd label legend li map mark menu meter nav noscript object ol optgroup option output p pre progress q rp rt ruby s samp script section select small span strong style sub summary sup table tbody td textarea tfoot th thead time title tr u ul video applet acronym bgsound dir frameset noframes isindex area base br col command embed hr img input keygen link meta param source track wbr basefont frame applet acronym bgsound dir frameset noframes isindex listing nextid noembed plaintext rb strike xmp big blink center font marquee multicol nobr spacer tt basefont frame'.split(" ");
+
+module.exports = {html, tag, text, cond}
 
 for (var t of tags)
   module.exports[t] =

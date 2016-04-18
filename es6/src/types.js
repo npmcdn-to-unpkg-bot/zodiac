@@ -38,8 +38,8 @@ let types = module.exports = {
   },
 
   ticker: function (interval=1000) {
-    let dep     = new tracker.Dependency()
-    let counter = 0
+    let dep     = new tracker.Dependency();
+    let counter = 0;
     function cb() {
       counter += 1;
       dep.changed();
