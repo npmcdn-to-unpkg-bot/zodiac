@@ -26,13 +26,13 @@ let renderer =
     h1({class: "yo", data: ["tick-", ticker.get]},
       "Ticker: ", [ticker.get]),
 
-    p({$mousemove: inc}, "Count: ", [counter.get]),
-    p({_click: inc}, "This captures events. Count: ", [counter.get]));
+    // p({$mousemove: inc}, "Count: ", [counter.get]),
+    // p({_click: inc}, "This captures events. Count: ", [counter.get]));
 
-    // cond(tickerEven,
-    //   cond(threeish, "Theeish...",
-    //     p({$mousemove: inc}, "Count: ", [counter.get])),
-    //   p({_click: inc}, "This captures events. Count: ", [counter.get])));
+    cond(tickerEven,
+      cond(threeish, "Theeish...",
+        p({$mousemove: inc}, "Count: ", [counter.get])),
+      p({_click: inc}, "This captures events. Count: ", [counter.get])));
 
 let toggler = renderer.render(z.mount(document.body));
 

@@ -198,10 +198,10 @@ class TagNodeInstance extends NodeInstance {
   }
 
   _activate() {
-    this.comps = [];
+    this.computations = [];
     this.eachDefinitionAttr((k, v) => {
       if (_is(v, "Array"))
-        this.comps.push(tracker.autorun(() => {
+        this.computations.push(tracker.autorun(() => {
           let str = v.map(function (s) {
             return typeof(s) == "function" ? s() : s
           }).join("");
@@ -214,7 +214,7 @@ class TagNodeInstance extends NodeInstance {
   }
 
   _deactivate() {
-    for (var c of this.comps) c.stop();
+    for (var c of this.computations) c.stop();
     this.domParent.dom.removeChild(this.dom);
     this.html.deactivate();
   }
@@ -222,11 +222,59 @@ class TagNodeInstance extends NodeInstance {
   activeDescendants() { return [this.html]; }
 }
 
+// Cond
+
+class CondNode {
+
+  constructor(check, a, b) {
+    this.check = check;
+    this.a = tagify(a);
+    if (b) this.b = tagify(b);
+  }
+
+  render(parentNodeInstance) {
+    return new CondNodeInstance(this, parentNodeInstance);
+  }
+}
+
+function cond(check, a, b) {
+  return new CondNode(check, a, b);
+}
+
+class CondNodeInstance extends NodeInstance {
+
+  subConstructor() {
+    this.a = this.nodeDefinition.a.render(this);
+    if (this.nodeDefinition.b)
+      this.b = this.nodeDefinition.b.render(this);
+  }
+
+  _activate() {
+    this.computation = tracker.autorun(() => {
+      this.state = !!this.nodeDefinition.check();
+      if (this.state != this.a.active) this.a.toggle();
+      if (this.b && this.state == this.b.active) this.b.toggle();
+    });
+  }
+  _deactivate() {
+    this.computation.stop();
+    if (this.a.active) this.a.deactivate();
+    if (this.b && this.b.active) this.b.deactivate();
+  }
+
+  activeDescendants() {
+    r = [];
+    if (this.a.active) r.push(this.a);
+    if (this.b && this.b.active) r.push(this.b);
+    return r;
+  }
+}
+
 // TODO:
-// cond, loop, tests.
+// loop, tests.
 
 module.exports = {
-  mount, text, html, tag //, cond, loop
+  mount, text, html, tag, cond //, loop
 }
 
 // html, head and body are not included.
