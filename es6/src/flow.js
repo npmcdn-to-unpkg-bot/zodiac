@@ -1,51 +1,48 @@
+
+
 class Flow {
   constructor(dom, parentFlow, index) {
-    this.dom        = dom;
-    this.children   = [];
-    this.parentFlow = parentFlow;
-    this.index      = index;
-    this.toggle();
+    this.dom         = dom;
+    this.children    = [];
+    this.parentFlow  = parentFlow;
+    this.index       = index;
+
+    if (this.parentFlow) {
+      this.parentFlow.children.push(this);
+
+      if (this.parentFlow.dom) this.parentDomFlow = this.parentFlow
+      else this.parentDomFlow = this.parentFlow.parentDomFlow;
+    }
+
+    if (this.dom) this.domChildren = [];
+
+    if (this.parentDomFlow && this.dom) {
+      this.parentDomIndex = this.parentDomFlow.domChildren.length;
+      this.parentDomFlow.domChildren.push(this);
+    }
   }
 
   nextDom() {
-    if (!this.parentFlow) return undefined;
-    for (var i=this.index+1; i<this.parentFlow.children.length; i++) {
-      let c = this.parentFlow.children[i];
-      if (c.included && c.dom) return c;
-    }
-    if (!this.parentFlow || this.parentFlow.dom) return undefined;
-    return this.parentFlow.nextDom();
+    this.parentDomFlow.children[this.parentDomIndex];
   }
 
+  // Toggles dom of a particular node. This only wo
   toggle() {
-    if (!this.dom) return;
     this.included = !this.included;
     if (!this.dom) throw("Cannot toggle node without dom");
-    if (this.constructor == Root) return
-      if (this.included)
-        this.surroundingDom().insertBefore(this.dom, this.nextDom());
-      else
-        this.surroundingDom().removeChild(this.dom);
-  }
-
-  surroundingDom() {
-    if (!this.parentFlow) return;
-    return this.parentFlow.selfOrSurroundingDom();
-  }
-
-  selfOrSurroundingDom() {
-    // if (!this.included)  throw("tried to remove from unincluded dom.");
-    if (this.dom)        return this.dom;
-    if (this.parentFlow) return this.parentFlow.selfOrSurroundingDom();
+    if (this.constructor == Root) return;
+    // console.log("---");
+    // console.log(this.parentDomFlow.dom); // TODO
+    if (this.included)
+      this.parentDomFlow.dom.insertBefore(this.dom, this.nextDom());
+    else
+      this.parentDomFlow.dom.removeChild(this.dom);
   }
 
   branch(dom) {
     let c = new Flow(dom, this, this.children.length);
-    this.children.push(c);
     return c;
   }
-
-  // TODO: trim; allow truncating the list to free memory.
 }
 
 class Root extends Flow { }

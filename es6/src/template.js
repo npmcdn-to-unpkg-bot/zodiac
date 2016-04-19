@@ -9,17 +9,15 @@ function _is(obj, kind) {
 
 function tagify(obj) {
   if (typeof(obj) == "string")    return text(obj);
-  if (typeof(obj) == "function")  return obj;
   if (_is(obj, "Array")) {
     if (obj.length != 1) throw("Wrong array length in template.");
     return text(obj[0]);
   }
-  console.log(obj);
-  throw("Invalid data in template (logged to console).");
+  else return obj;
 }
 
 function text(str) {
-  return function (parentFlow) {
+  function render(parentFlow) {
     let comp, isReactive = typeof(str) == "function";
 
     function autorun() {
@@ -28,40 +26,42 @@ function text(str) {
           dom.nodeValue = str();
         });
     }
-
     let dom = isReactive ? document.createTextNode("") :
                            document.createTextNode(str);
-    autorun();
 
     let leaf = parentFlow.branch(dom);
 
-    return function () { // toggle
-      if (comp && !comp.stopped) comp.stop()
-      else if (isReactive)       autorun(dom);
+    function toggle() {
+      if (!comp || comp.stopped) autorun()
+      else if (isReactive)       comp.stop();
       leaf.toggle();
     }
+    return {toggle};
   }
+  return {render};
 }
 
 function html(...children) {
   let mounters = children.map(c => tagify(c));
-  return function (parentFlow) {
-    let togglers = mounters.map((m) => m(parentFlow));
+  function render(parentFlow) {
+    let togglers = mounters.map((m) => m.render(parentFlow));
     // console.log(togglers);
-    return function () { for (var t of togglers) t(); }
+    function toggle() { for (var t of togglers) t.toggle(); }
+    return { toggle };
   }
+
+  return { render };
 }
 
 function tag(name, ...children) {
   "use strict";
 
   let attrs        = {};
-  let events       = {};
   if (typeof(children[0]) == "object") attrs = children.shift();
   let childMounter = html(...children);
 
-  return function (parentFlow) {
-    let comps, dom = document.createElement(name);
+  function render(parentFlow) {
+    let comps = [], dom = document.createElement(name);
     let branch = parentFlow.branch(dom);
 
     Object.keys(attrs).forEach(function (k) {
@@ -86,56 +86,49 @@ function tag(name, ...children) {
         }
       });
     }
-    autorun();
-    let childToggler = childMounter(branch);
+    let childToggler = childMounter.render(branch);
 
-    return function () {
+    function toggle() {
       if (comps.length > 0 && comps[0].stopped) autorun();
       else for (var c of comps) c.stop();
       branch.toggle();
-      childToggler();
+      childToggler.toggle();
     }
+
+    return {toggle};
   }
+  return { render };
 }
 
 function cond(check, a, b) {
   a = tagify(a);
   if (b) b = tagify(b);
 
-  return function (parentFlow) {
+  function render (parentFlow) {
 
-    let newState, curState;
-    let aToggler = a(parentFlow);
-    let bToggler = b(parentFlow);
+    let aToggler = a.render(parentFlow);
+    let bToggler = b ? b.render(parentFlow) : undefined;
 
-    // TODO: don't automatically toggle on across architecture...
-    // so that we don't have to flash b.
-    newState = check();
-    if (!newState)     aToggler();
-    if (newState && b) bToggler();
-
-    let comp;
+    let comp, state, aOn = false, bOn = false;
 
     function autorun() {
       comp = tracker.autorun(function () {
-        newState = check();
-        if (newState != curState) {
-          if (b) bToggler();
-          aToggler();
-          curState = newState;
-        }
+        state = !!check();
+        if (     state != aOn) { aToggler.toggle(); aOn = !aOn; }
+        if (b && state == bOn) { bToggler.toggle(); bOn = !bOn; }
       });
     }
-
-    autorun();
-
-    return function () { // toggle
-      if (comp.stopped) autorun()
-      else comp.stop();
-      if (check()) aToggler()
-      else if (b)  bToggler();
+    function toggle() {
+      if (!comp || comp.stopped) autorun()
+      else {
+        comp.stop();
+        if (state) aToggler.toggle();
+        else if (b) bToggler.toggle();
+      }
     }
+    return {toggle};
   }
+  return { render };
 }
 
 // html, head and body are not included.
@@ -148,6 +141,5 @@ for (var t of tags)
     (function (t) {
       return function () { return tag(t, ...arguments) };
     })(t);
-  // Yo bro i put a closure in ur closure so you u get closure.
   // Yes, we actually need this to correctly bind t for each tag function.
 

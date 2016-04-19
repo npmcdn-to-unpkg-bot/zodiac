@@ -2,6 +2,7 @@
 import z from "./src/zodiac";
 
 window.z = z;
+window.nodes = z.template;
 
 let {cond, h1, p, html, tag, text} = z.template;
 
@@ -14,6 +15,9 @@ function inc() {
 function tickerEven() {
   return ticker.get() % 2 == 0;
 }
+function threeish() {
+  return ticker.get() % 3 == 0;
+}
 
 let ticker = z.ticker();
 
@@ -22,13 +26,19 @@ let renderer =
     h1({class: "yo", data: ["tick-", ticker.get]},
       "Ticker: ", [ticker.get]),
 
-    cond(tickerEven,
-      p({$click: inc}, "This is a paragraph. Count: ", [counter.get]),
-      p({_click: inc}, "This captures events. Count: ", [counter.get])));
+    p({$mousemove: inc}, "Count: ", [counter.get]),
+    p({_click: inc}, "This captures events. Count: ", [counter.get]));
 
-let toggler = renderer(z.mount(document.body));
+    // cond(tickerEven,
+    //   cond(threeish, "Theeish...",
+    //     p({$mousemove: inc}, "Count: ", [counter.get])),
+    //   p({_click: inc}, "This captures events. Count: ", [counter.get])));
+
+let toggler = renderer.render(z.mount(document.body));
 
 window.toggler = toggler;
+
+console.log(toggler);
 
 // function render(val) {
 //
@@ -59,4 +69,6 @@ window.toggler = toggler;
 //     }
 //   }
 // }
+
+
 
