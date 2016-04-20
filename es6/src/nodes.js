@@ -32,19 +32,22 @@ class NodeInstance {
     this.active = false;
   }
 
-  nextDomSibling() {
-    if (this.domParent) return this.domParent.domChildAfter(this);
+  // the flow is the theoretical order that the child dom nodes would have if they were all active at once. Only tag nodes and mountings have flow, and only tag and text nodes can be part of the flow.
+  _setupFlow() {
+    if (this.dom) {
+      this.flowIndex = this.domParent.flow.length;
+      this.domParent.flow.push(this);
+    }
+    if (this.descendants)
+      for (var d of this.descendants()) d._setupFlow();
   }
 
-  domChildAfter(target, state = {passed: false}) {
-    if (!this.active) return null;
-    if (state.passed && this.dom) return this;
-    if (this == target) state.passed = true;
-    if (this.activeDescendants && !this.dom)
-      for (var d of this.activeDescendants()) {
-        let match = d.domChildAfter(target, state);
-        if (match) return match;
-      }
+  // Returns the next active dom sibling after the current one. By active dom, i mean dom that is currently included in the document.
+  nextDomSibling() {
+    for (var i=this.flowIndex; i<this.domParent.flow.length; i++) {
+      let flow = this.domParent.flow[i];
+      if (flow && flow.active) return flow.dom;
+    }
   }
 }
 
@@ -52,25 +55,26 @@ class NodeInstance {
 
 class Mounting extends NodeInstance {
 
-  subConstructor() {}
-
-  _activate() {
-    throw(
-      "You cannot activate a mounting. Activate the root instead.");
+  subConstructor() {
+    this.active = true;
+    this.flow = [];
   }
 
-  _deactivate() {
-    throw(
-      "You cannot deactivate a mounting. Deactivate the root instead.");
+  descendants() {
+    return [this.root];
   }
+
+  toggle() { this.root.toggle(); }
 
   nextDomSibling() { throw("A mounting does not have dom siblings."); }
 }
 
-function mount(dom) {
-  var r = new Mounting();
-  r.dom = dom;
-  return r;
+function mount(dom, root) {
+  var m = new Mounting();
+  m.dom = dom;
+  m.root = root.render(m);
+  m.root._setupFlow();
+  return m;
 }
 
 // Text
@@ -156,14 +160,14 @@ class HtmlNodeInstance extends NodeInstance {
   _activate()   { for (var c of this.children) c.activate(); }
   _deactivate() { for (var c of this.children) c.deactivate(); }
 
-  activeDescendants() { return this.children; }
+  descendants() { return this.children; }
 }
 
 class TagNode {
 
   constructor(name, children) {
     this.name = name;
-    this.attrs = children[0].constructor == Object
+    this.attrs = children[0] && children[0].constructor == Object
       ? children.shift()
       : {};
     this.html = html(...children);
@@ -183,10 +187,14 @@ class TagNodeInstance extends NodeInstance {
   subConstructor() {
     this.dom = document.createElement(this.nodeDefinition.name);
     this.html = this.nodeDefinition.html.render(this);
+    this.flow = [];
 
     this.eachDefinitionAttr((k, v) => {
-      if (!_is(v, "Array") && (k[0] == "$" || k[0] == "_"))
-        this.dom.addEventListener(k.slice(1), v, k[0] == "$")
+      if (!_is(v, "Array") && (k[0] == "$" || k[0] == "_")){
+        if (typeof(v) != "function")
+          throw("Template event listener not a function.");
+        this.dom.addEventListener(k.slice(1), v, k[0] == "$");
+      }
       else
         this.dom.setAttribute(k, v);
     });
@@ -195,6 +203,12 @@ class TagNodeInstance extends NodeInstance {
   eachDefinitionAttr(fn) {
     Object.keys(this.nodeDefinition.attrs).forEach((k) =>
       fn(k, this.nodeDefinition.attrs[k]));
+  }
+
+  _sendEvent(name) {
+    var ev = document.createEvent('Event');
+    ev.initEvent(name, false, true);
+    this.dom.dispatchEvent(ev);
   }
 
   _activate() {
@@ -211,15 +225,17 @@ class TagNodeInstance extends NodeInstance {
 
     this.html.activate();
     this.domParent.dom.insertBefore(this.dom, this.nextDomSibling());
+    this._sendEvent("_activated");
   }
 
   _deactivate() {
+    this._sendEvent("_deactivating");
     for (var c of this.computations) c.stop();
     this.domParent.dom.removeChild(this.dom);
     this.html.deactivate();
   }
 
-  activeDescendants() { return [this.html]; }
+  descendants() { return [this.html]; }
 }
 
 // Cond
@@ -262,10 +278,9 @@ class CondNodeInstance extends NodeInstance {
     if (this.b && this.b.active) this.b.deactivate();
   }
 
-  activeDescendants() {
-    r = [];
-    if (this.a.active) r.push(this.a);
-    if (this.b && this.b.active) r.push(this.b);
+  descendants() {
+    let r = [this.a];
+    if (this.b) r.push(this.b);
     return r;
   }
 }
@@ -274,7 +289,7 @@ class CondNodeInstance extends NodeInstance {
 // loop, tests.
 
 module.exports = {
-  mount, text, html, tag, cond //, loop
+  mount, text, html, tag, cond, NodeInstance //, loop
 }
 
 // html, head and body are not included.

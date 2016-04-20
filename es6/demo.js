@@ -4,9 +4,30 @@ import z from "./src/zodiac";
 window.z = z;
 window.nodes = z.template;
 
-let {cond, h1, p, html, tag, text} = z.template;
+let {cond, strong, hr, h1, p, a, html, tag, text, NodeInstance} = z.template;
 
 let counter = z.var(0);
+
+
+function counterComponent(initialValue) {
+  let counter = z.var(initialValue);
+
+  function inc() {
+    counter.set(counter.get() + 1);
+  }
+
+  function activated(ev) {
+    console.log(ev.target);
+  }
+
+  let template =
+    p({__activated: activated, },
+      "Value: ", [counter.get], " ",
+      a({$click: inc, href: "#"},
+        "(+)"));
+
+  return template;
+}
 
 function inc() {
   counter.set(counter.get() + 1);
@@ -21,7 +42,9 @@ function threeish() {
 
 let ticker = z.ticker();
 
-let renderer =
+// Next up: loops!
+
+let page =
   html(
     h1({class: "yo", data: ["tick-", ticker.get]},
       "Ticker: ", [ticker.get]),
@@ -30,45 +53,17 @@ let renderer =
     // p({_click: inc}, "This captures events. Count: ", [counter.get]));
 
     cond(tickerEven,
-      cond(threeish, "Theeish...",
+      cond(threeish,
+        strong("Threeish..."),
         p({$mousemove: inc}, "Count: ", [counter.get])),
-      p({_click: inc}, "This captures events. Count: ", [counter.get])));
+      p({_click: inc}, "This captures events. Count: ", [counter.get])),
 
-let toggler = renderer.render(z.mount(document.body));
+    counterComponent(3),
+    hr()
+    );
 
-window.toggler = toggler;
+let instance = z.mount(document.body, page);
 
-console.log(toggler);
-
-// function render(val) {
-//
-//   let counter = z.var(val);
-//
-//   function inc() {
-//     counter.set(counter.get() + 1)
-//   }
-//
-//   let header = h1({class: "nice"}, "Counter");
-//
-//   let dom = html(
-//     div(
-//       header,
-//       p(
-//         "Value: ", [counter.get], " ",
-//         a({onclick: inc}, "Count!")
-//       )
-//     ),
-//   );
-//
-//   return (mount, pos) => {
-//     destructor = dom(mount, pos);
-//     uilib.getAttention(header);
-//     return () => { // destroy
-//       uilib.fadeout(some_dom_node)
-//       destructor()
-//     }
-//   }
-// }
-
-
+window.instance = instance;
+instance.toggle();
 
