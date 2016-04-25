@@ -4,7 +4,7 @@ import z from "./src/zodiac";
 window.z = z;
 window.nodes = z.template;
 
-let {cond, strong, hr, h1, p, a, html, tag, text, NodeInstance} = z.template;
+let {cond, loop, div, strong, hr, h1, p, a, html, tag, text} = z.template;
 
 let counter = z.var(0);
 
@@ -29,6 +29,9 @@ function counterComponent(initialValue) {
   return template;
 }
 
+
+let ticker = z.ticker();
+
 function inc() {
   counter.set(counter.get() + 1);
 }
@@ -40,9 +43,10 @@ function threeish() {
   return ticker.get() % 3 == 0;
 }
 
-let ticker = z.ticker();
+function liveArray() {
+  return [ticker.get(), ticker.get() + 1, ticker.get() + 2];
+}
 
-// Next up: loops!
 
 let page =
   html(
@@ -52,13 +56,22 @@ let page =
     // p({$mousemove: inc}, "Count: ", [counter.get]),
     // p({_click: inc}, "This captures events. Count: ", [counter.get]));
 
+    // div(
     cond(tickerEven,
       cond(threeish,
         strong("Threeish..."),
         p({$mousemove: inc}, "Count: ", [counter.get])),
       p({_click: inc}, "This captures events. Count: ", [counter.get])),
+    // ),
 
     counterComponent(3),
+    loop(liveArray,
+        function (n) { 
+          return html(
+              cond(tickerEven, "x", "y"), p("Hello ", n),
+              counterComponent(3)
+              )
+        }),
     hr()
     );
 

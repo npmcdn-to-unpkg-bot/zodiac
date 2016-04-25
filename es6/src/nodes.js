@@ -32,21 +32,31 @@ class NodeInstance {
     this.active = false;
   }
 
-  // the flow is the theoretical order that the child dom nodes would have if they were all active at once. Only tag nodes and mountings have flow, and only tag and text nodes can be part of the flow.
-  _setupFlow() {
-    if (this.dom) {
-      this.flowIndex = this.domParent.flow.length;
-      this.domParent.flow.push(this);
-    }
-    if (this.descendants)
-      for (var d of this.descendants()) d._setupFlow();
+  // Returns the next active dom sibling after the current one. By active dom, i mean dom that is currently included in the document. This is definitely the most difficult piece of code.
+  nextDomSibling() {
+    let r = this.domParent.domChildAfter(this);
+    if (r) return r.dom;
   }
 
-  // Returns the next active dom sibling after the current one. By active dom, i mean dom that is currently included in the document.
-  nextDomSibling() {
-    for (var i=this.flowIndex; i<this.domParent.flow.length; i++) {
-      let flow = this.domParent.flow[i];
-      if (flow && flow.active) return flow.dom;
+  domChildAfter(target, state = {passed: false}) {
+    if (!this.descendants) return;
+    for (var d of this.descendants()) {
+      // console.log(d);
+      if (state.passed) {
+        if (d.dom && d.active) {
+          // console.log("found next in flow");
+          return d;
+        }
+      }
+      else if (d == target) {
+        // console.log("found");
+        state.passed = true;
+      }
+      if (d.constructor != TagNodeInstance) {
+        // console.log("descending");
+        let match = d.domChildAfter(target, state);
+        if (match) return match;
+      }
     }
   }
 }
@@ -57,7 +67,6 @@ class Mounting extends NodeInstance {
 
   subConstructor() {
     this.active = true;
-    this.flow = [];
   }
 
   descendants() {
@@ -73,7 +82,6 @@ function mount(dom, root) {
   var m = new Mounting();
   m.dom = dom;
   m.root = root.render(m);
-  m.root._setupFlow();
   return m;
 }
 
@@ -127,6 +135,7 @@ function _is(obj, kind) {
 
 function tagify(obj) {
   if (typeof(obj) == "string")    return text(obj);
+  if (typeof(obj) == "number")    return text(obj);
   if (_is(obj, "Array")) {
     if (obj.length != 1) throw("Wrong array length in template.");
     return text(obj[0]);
@@ -187,7 +196,6 @@ class TagNodeInstance extends NodeInstance {
   subConstructor() {
     this.dom = document.createElement(this.nodeDefinition.name);
     this.html = this.nodeDefinition.html.render(this);
-    this.flow = [];
 
     this.eachDefinitionAttr((k, v) => {
       if (!_is(v, "Array") && (k[0] == "$" || k[0] == "_")){
@@ -265,9 +273,14 @@ class CondNodeInstance extends NodeInstance {
       this.b = this.nodeDefinition.b.render(this);
   }
 
+  checkState() {
+    let chk = this.nodeDefinition.check;
+    return !!(typeof(chk) == "function" ? chk() : chk)
+  }
+
   _activate() {
     this.computation = tracker.autorun(() => {
-      this.state = !!this.nodeDefinition.check();
+      this.state = this.checkState();
       if (this.state != this.a.active) this.a.toggle();
       if (this.b && this.state == this.b.active) this.b.toggle();
     });
@@ -285,11 +298,67 @@ class CondNodeInstance extends NodeInstance {
   }
 }
 
-// TODO:
-// loop, tests.
+// TODO: rename HtmlNode etc.
+
+class LoopNode {
+
+  constructor(listSource, body) {
+    this.isReactive = typeof(listSource) == "function";
+    this.listSource = listSource;
+    this.body = body;
+  }
+
+  render(parentNodeInstance) {
+    return new LoopNodeInstance(this, parentNodeInstance);
+  }
+}
+
+function loop(listSource, body) {
+  return new LoopNode(listSource, body);
+}
+
+class LoopNodeInstance extends NodeInstance {
+
+  subConstructor() {
+    let ndf = this.nodeDefinition;
+    if (!ndf.isReactive) {
+      this.bodyInstances = ndf.listSource.map((m) => {
+        return ndf.body(m).render(this);
+      });
+    }
+  }
+
+  _activate() {
+    let ndf = this.nodeDefinition;
+    if (ndf.isReactive) {
+      this.computation = tracker.autorun(() => {
+        if (this.active)
+          for (var c of this.bodyInstances) c.deactivate();
+        console.log(ndf);
+        this.bodyInstances = ndf.listSource().map((m) => {
+          return ndf.body(m).render(this);
+        });
+        for (var c of this.bodyInstances) c.activate();
+      });
+    }
+    else
+      for (var b of this.bodyInstances) b.activate();
+  }
+
+  _deactivate() {
+    if (this.computation) this.computation.stop();
+    for (var b of this.bodyInstances) b.deactivate();
+  }
+
+  descendants() {
+    return this.bodyInstances || [];
+  }
+}
+
+// TODO: tests.
 
 module.exports = {
-  mount, text, html, tag, cond, NodeInstance //, loop
+  mount, text, html, tag, cond, loop, NodeInstance
 }
 
 // html, head and body are not included.
