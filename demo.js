@@ -1,5 +1,5 @@
 
-import z from "./src/zodiac";
+import z from "./dist/zodiac";
 const {
   cond, loop, dynamic, component, tag, text,
   div, strong, hr, h1, h2, h3, h4, p, a, html
