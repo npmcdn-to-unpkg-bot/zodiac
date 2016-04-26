@@ -6,7 +6,7 @@
  * @namespace Tracker
  * @summary The namespace for Tracker-related methods.
  */
-let Tracker = module.exports = {};
+const Tracker = module.exports = {};
 
 // http://docs.meteor.com/#tracker_active
 

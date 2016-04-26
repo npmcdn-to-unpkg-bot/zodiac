@@ -1,12 +1,14 @@
 
 
-let tracker  = require("./tracker");
-let types    = require("./types");
-let template = require("./nodes");
+const tracker  = require("./tracker");
+const types    = require("./types");
+const template = require("./nodes");
 
-let z = module.exports = {
+const z = module.exports = {
   tracker, types, template,
   mount: template.mount
 };
+
+if (window) window.z = z;
 
 Object.assign(z, tracker, types);

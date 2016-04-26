@@ -1,7 +1,7 @@
 
-let tracker = require("./tracker");
+const tracker = require("./tracker");
 
-let types = module.exports = {
+const types = module.exports = {
 
   var: function (value=undefined) {
     let dep = new tracker.Dependency();

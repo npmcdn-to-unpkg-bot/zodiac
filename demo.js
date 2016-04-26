@@ -1,6 +1,6 @@
 
 import z from "./src/zodiac";
-let {
+const {
   cond, loop, dynamic, component, tag, text,
   div, strong, hr, h1, h2, h3, h4, p, a, html
 } = z.template;
@@ -59,7 +59,7 @@ function tickerComponent(initialValue) {
 
 
 
-let page =
+const page =
   html(
     counterComponent(0),
     tickerComponent(0),
@@ -73,7 +73,7 @@ let page =
     hr()
     );
 
-let instance = z.mount(document.body, page);
+const instance = z.mount(document.body, page);
 
 window.instance = instance;
 instance.toggle();
