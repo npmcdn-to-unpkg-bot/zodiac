@@ -212,7 +212,7 @@ class TagNodeInstance extends NodeInstance {
     if(v == false || v == undefined || v == null) {
     this.dom.removeAttribute(k);
     } else
-    this.dom.setAttribute(k, v);
+      this.dom.setAttribute(k, v);
   }
 
   eachDefinitionAttr(fn) {
