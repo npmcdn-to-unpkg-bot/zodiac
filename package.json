@@ -1,6 +1,6 @@
 {
   "name":        "zodiac",
-  "version":     "0.1.0",
+  "version":     "0.1.1",
   "description": "Reactive web component microframework based on Tracker",
   "keywords": [
     "reactive",
@@ -22,9 +22,6 @@
   "scripts": {
     "start": "http-server",
     "test": "cake test:build && node_modules/.bin/mocha-phantomjs ./test/index.html"
-  },
-  "dependencies": {
-    "meteor-standalone-tracker": "^1.0.97"
   },
   "devDependencies": {
     "babel-cli": "*",
