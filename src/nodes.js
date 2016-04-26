@@ -209,9 +209,9 @@ class TagNodeInstance extends NodeInstance {
   }
 
   _setAttr(k, v) {
-    if(v == false || v == undefined || v == null) {
-    this.dom.removeAttribute(k);
-    } else
+    if(v == false || v == undefined || v == null)
+      this.dom.removeAttribute(k)
+    else
       this.dom.setAttribute(k, v);
   }
 
