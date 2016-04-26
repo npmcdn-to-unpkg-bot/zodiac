@@ -209,6 +209,8 @@ class TagNodeInstance extends NodeInstance {
   }
 
   _setAttr(k, v) {
+    console.log(typeof(v));
+    console.log("---");
     if(v == false || v == undefined || v == null)
       this.dom.removeAttribute(k)
     else
@@ -231,9 +233,11 @@ class TagNodeInstance extends NodeInstance {
     this.eachDefinitionAttr((k, v) => {
       if (_is(v, "Array"))
         this.computations.push(tracker.autorun(() => {
-          let str = v.map(function (s) {
-            return typeof(s) == "function" ? s() : s
-          }).join("");
+          let str = v.length > 1
+            ? v.map(function (s) {
+                return typeof(s) == "function" ? s() : s
+              }).join("")
+            : typeof(v[0]) == "function" ? v[0]() : v[0];
           this._setAttr(k, str);
         }));
     });

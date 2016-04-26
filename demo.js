@@ -47,8 +47,12 @@ function counterComponent(initialValue) {
 function tickerComponent(initialValue) {
   let ticker = z.ticker();
 
+  function isEven() {
+    return ticker.get() % 2 == 0;
+  }
+
   return html(
-    h4({class: "yo", data: ["tick-", ticker.get]},
+    h4({class: [() => isEven() && "yo"], data: ["tick-", ticker.get]},
       "Ticker: ", [ticker.get])
   );
 }
