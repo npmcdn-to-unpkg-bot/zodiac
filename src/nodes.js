@@ -237,7 +237,6 @@ class TagNodeInstance extends NodeInstance {
   }
 
   _deactivate() {
-    this._sendEvent("_deactivating");
     for (var c of this.computations) c.stop();
     this.domParent.dom.removeChild(this.dom);
     this.html.deactivate();
@@ -300,6 +299,8 @@ class CondNodeInstance extends NodeInstance {
 
 // TODO: rename HtmlNode etc.
 
+// Loop
+
 class LoopNode {
 
   constructor(listSource, body) {
@@ -334,7 +335,6 @@ class LoopNodeInstance extends NodeInstance {
       this.computation = tracker.autorun(() => {
         if (this.active)
           for (var c of this.bodyInstances) c.deactivate();
-        console.log(ndf);
         this.bodyInstances = ndf.listSource().map((m) => {
           return ndf.body(m).render(this);
         });
@@ -355,10 +355,115 @@ class LoopNodeInstance extends NodeInstance {
   }
 }
 
+// Dynamic
+
+class DynamicNode {
+
+  constructor(condition, branches) {
+    this.condition = condition;
+    this.branches = branches;
+    this.isReactive = typeof(condition) == "function";
+  }
+
+  render(parentNodeInstance) {
+    return new DynamicNodeInstance(this, parentNodeInstance);
+  }
+}
+
+function dynamic(condition, branches) {
+  return new DynamicNode(condition, branches);
+}
+
+class DynamicNodeInstance extends NodeInstance {
+
+  subConstructor() {
+    this.branches = {};
+    this.children = [];
+    let ndf = this.nodeDefinition;
+    Object.keys(ndf.branches).forEach((k) => {
+      this.branches[k] = ndf.branches[k].render(this);
+      this.children.push(this.branches[k]);
+    });
+    if (!ndf.isReactive)
+      this.state = ndf.condition;
+  }
+
+  _activateState() {
+    if (!this.branches[this.state]) {
+      console.log(this);
+      throw("Unknown dynamic switch state.");
+    }
+    this.branches[this.state].activate();
+  }
+
+  _activate() {
+    let ndf = this.nodeDefinition;
+    if (ndf.isReactive) {
+      this.computation = tracker.autorun(() => {
+        let newState = ndf.condition();
+        if (newState == this.state) return;
+        this.state = newState;
+        this._activateState();
+      });
+    }
+    else 
+      this._activateState();
+  }
+
+  _deactivate() {
+    if (this.isReactive) this.computation.stop();
+    let branch = this.branches[this.state];
+    if (branch) branch.deactivate();
+  }
+
+  descendants() { return this.children; }
+}
+
+
+// Component
+
+class ComponentNode {
+
+  constructor(props = {}) {
+    this.onShow = props.onShow;
+    this.onHide = props.onHide;
+    this.template = tagify(props.template);
+  }
+
+  render(parentNodeInstance) {
+    return new ComponentNodeInstance(this, parentNodeInstance);
+  }
+}
+
+function component(props) {
+  return new ComponentNode(props);
+}
+
+class ComponentNodeInstance extends NodeInstance {
+
+  subConstructor() {
+    this.template = this.nodeDefinition.template.render(this);
+  }
+
+  _activate() {
+    this.template.activate();
+    if (this.nodeDefinition.onShow) this.nodeDefinition.onShow(this);
+  }
+
+  _deactivate() {
+    if (this.nodeDefinition.onHide) this.nodeDefinition.onHide(this);
+    this.template.deactivate();
+  }
+
+  descendants() { return [this.template]; }
+}
+
+
+
 // TODO: tests.
 
 module.exports = {
-  mount, text, html, tag, cond, loop, NodeInstance
+  mount, text, html, tag, cond, loop, dynamic, component
 }
 
 // html, head and body are not included.
