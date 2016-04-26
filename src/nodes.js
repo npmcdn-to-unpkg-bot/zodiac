@@ -204,8 +204,15 @@ class TagNodeInstance extends NodeInstance {
         this.dom.addEventListener(k.slice(1), v, k[0] == "$");
       }
       else
-        this.dom.setAttribute(k, v);
+        this._setAttr(k, v);
     });
+  }
+
+  _setAttr(k, v) {
+    if(v == false || v == undefined || v == null) {
+    this.dom.removeAttribute(k);
+    } else
+    this.dom.setAttribute(k, v);
   }
 
   eachDefinitionAttr(fn) {
@@ -227,7 +234,7 @@ class TagNodeInstance extends NodeInstance {
           let str = v.map(function (s) {
             return typeof(s) == "function" ? s() : s
           }).join("");
-          this.dom.setAttribute(k, str);
+          this._setAttr(k, str);
         }));
     });
 

@@ -380,8 +380,15 @@ var TagNodeInstance = function (_NodeInstance4) {
         if (!_is(v, "Array") && (k[0] == "$" || k[0] == "_")) {
           if (typeof v != "function") throw "Template event listener not a function.";
           _this7.dom.addEventListener(k.slice(1), v, k[0] == "$");
-        } else _this7.dom.setAttribute(k, v);
+        } else _this7._setAttr(k, v);
       });
+    }
+  }, {
+    key: "_setAttr",
+    value: function _setAttr(k, v) {
+      if (v == false || v == undefined || v == null) {
+        this.dom.removeAttribute(k);
+      } else this.dom.setAttribute(k, v);
     }
   }, {
     key: "eachDefinitionAttr",
@@ -410,7 +417,7 @@ var TagNodeInstance = function (_NodeInstance4) {
           var str = v.map(function (s) {
             return typeof s == "function" ? s() : s;
           }).join("");
-          _this9.dom.setAttribute(k, str);
+          _this9._setAttr(k, str);
         }));
       });
 
