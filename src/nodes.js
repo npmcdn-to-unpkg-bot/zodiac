@@ -209,8 +209,6 @@ class TagNodeInstance extends NodeInstance {
   }
 
   _setAttr(k, v) {
-    console.log(typeof(v));
-    console.log("---");
     if(v == false || v == undefined || v == null)
       this.dom.removeAttribute(k)
     else
