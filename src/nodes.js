@@ -333,7 +333,7 @@ class LoopNodeInstance extends NodeInstance {
     let ndf = this.nodeDefinition;
     if (!ndf.isReactive) {
       this.bodyInstances = ndf.listSource.map((m) => {
-        return ndf.body(m).render(this);
+        return ndf.body(() =>m).render(this);
       });
     }
   }
@@ -345,7 +345,7 @@ class LoopNodeInstance extends NodeInstance {
         if (this.active)
           for (var c of this.bodyInstances) c.deactivate();
         this.bodyInstances = ndf.listSource().map((m) => {
-          return ndf.body(m).render(this);
+          return ndf.body(() => m).render(this);
         });
         for (var c of this.bodyInstances) c.activate();
       });

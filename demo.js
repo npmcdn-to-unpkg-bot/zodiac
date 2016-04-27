@@ -70,7 +70,7 @@ const page =
     // loop(liveArray,
     //     function (n) { 
     //       return html(
-    //           cond(true, "x", "y"), p("Hello ", n)
+    //           cond(true, "x", "y"), p("Hello ", n())
     //           // counterComponent(3)
     //           )
     //     }),
