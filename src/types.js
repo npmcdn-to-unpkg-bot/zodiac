@@ -136,12 +136,15 @@ class Atom {
     return subAtom;
   }
 
-  // Returns the value of this atom or an optionally specified sub-atom
-  get(...path) {
+  // Returns a getter for this atom or an optionally specified sub-atom
+  stream(...path) {
     let atom = this._strictSel(path);
     atom._dep.depend();
-    return atom._get();
+    return atom._get;
   }
+
+  // Returns the value of this atom or an optionally specified sub-atom
+  get(...path) { return this.stream(...path); }
 
   // Sets the value of this atom or an optionally specified sub-atom
   set(...pathAndVal) {
@@ -189,6 +192,11 @@ class ValueAtom extends Atom {
 class ListOrObjectAtom extends Atom {
   subConstructor() {
     this._subAtoms = new this._getBaseType()();
+  }
+
+  each() {
+    for (var i=0; i<this._subAtoms.length; i++)
+      fn(this._subAtoms[i], i);
   }
 
   _validate(val) {
@@ -274,6 +282,7 @@ function atom(v) {
     case Array:   return new ListAtom(v);
     case Object:  return new ObjectAtom(v);
     case String:
+    case Boolean:
     case Number:  return new ValueAtom(v);
     default:
       console.log(v);

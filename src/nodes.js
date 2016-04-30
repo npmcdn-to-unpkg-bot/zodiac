@@ -201,7 +201,7 @@ class TagNodeInstance extends NodeInstance {
       if (!_is(v, "Array") && (k[0] == "$" || k[0] == "_")){
         if (typeof(v) != "function")
           throw("Template event listener not a function.");
-        this.dom.addEventListener(k.slice(1), v, k[0] == "$");
+        this.dom.addEventListener(k.slice(1), (e) => v(e), k[0] == "$");
       }
       else
         this._setAttr(k, v);
