@@ -144,7 +144,7 @@ class Atom {
   }
 
   // Returns the value of this atom or an optionally specified sub-atom
-  get(...path) { return this.stream(...path); }
+  get(...path) { return this.stream(...path)(); }
 
   // Sets the value of this atom or an optionally specified sub-atom
   set(...pathAndVal) {
