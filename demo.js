@@ -2,8 +2,12 @@
 import z from "./dist/zodiac";
 const {
   cond, loop, dynamic, component, tag, text,
-  div, strong, hr, h1, h2, h3, h4, p, a, html
+  div, strong, hr, h1, h2, h3, h4, p, a, dom
 } = z.template;
+
+const remembered = z.persistent(z.var, "remembered", 0);
+window.remembered = remembered;
+
 
 function counterComponent(initialValue) {
   let counter = z.var(initialValue);
@@ -24,7 +28,7 @@ function counterComponent(initialValue) {
   }
 
   return component({
-    template: html(
+    template: dom(
       p({__activated: activated, },
         "Value: ", [counter.get], " ",
         a({$click: inc, href: "#"},
@@ -51,7 +55,7 @@ function tickerComponent(initialValue) {
     return ticker.get() % 2 == 0;
   }
 
-  return html(
+  return dom(
     h4({class: [() => isEven() && "yo"], data: ["tick-", ticker.get]},
       "Ticker: ", [ticker.get])
   );
@@ -64,12 +68,12 @@ function tickerComponent(initialValue) {
 
 
 const page =
-  html(
+  dom(
     counterComponent(0),
     tickerComponent(0),
     // loop(liveArray,
     //     function (n) { 
-    //       return html(
+    //       return dom(
     //           cond(true, "x", "y"), p("Hello ", n())
     //           // counterComponent(3)
     //           )

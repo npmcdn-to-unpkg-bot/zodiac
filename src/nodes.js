@@ -32,7 +32,7 @@ class NodeInstance {
     this.active = false;
   }
 
-  // Returns the next active dom sibling after the current one. By active dom, i mean dom that is currently included in the document. This is definitely the most difficult piece of code.
+  // Returns the next active dom sibling after the current one. By active dom, i mean dom that is currently included in the document.
   nextDomSibling() {
     let r = this.domParent.domChildAfter(this);
     if (r) return r.dom;
@@ -126,7 +126,7 @@ class TextNodeInstance extends NodeInstance {
   }
 }
 
-// Html
+// List
 
 function _is(obj, kind) {
   let toString = Object.prototype.toString;
@@ -143,22 +143,22 @@ function tagify(obj) {
   else return obj;
 }
 
-class HtmlNode {
+class ListNode {
 
   constructor(children) {
     this.children = children.map(m => tagify(m));
   }
 
   render(parentNodeInstance) {
-    return new HtmlNodeInstance(this, parentNodeInstance);
+    return new ListNodeInstance(this, parentNodeInstance);
   }
 }
 
-function html(...children) {
-  return new HtmlNode(children);
+function list(...children) {
+  return new ListNode(children);
 }
 
-class HtmlNodeInstance extends NodeInstance {
+class ListNodeInstance extends NodeInstance {
 
   subConstructor() {
     this.children = this.nodeDefinition.children.map((m) => {
@@ -179,7 +179,7 @@ class TagNode {
     this.attrs = children[0] && children[0].constructor == Object
       ? children.shift()
       : {};
-    this.html = html(...children);
+    this.html = list(...children);
   }
 
   render(parentNodeInstance) {
@@ -197,7 +197,7 @@ class TagNodeInstance extends NodeInstance {
     this.dom = document.createElement(this.nodeDefinition.name);
     this.html = this.nodeDefinition.html.render(this);
 
-    this.eachDefinitionAttr((k, v) => {
+    this._eachDefinitionAttr((k, v) => {
       if (!_is(v, "Array") && (k[0] == "$" || k[0] == "_")){
         if (typeof(v) != "function")
           throw("Template event listener not a function.");
@@ -215,7 +215,7 @@ class TagNodeInstance extends NodeInstance {
       this.dom.setAttribute(k, v);
   }
 
-  eachDefinitionAttr(fn) {
+  _eachDefinitionAttr(fn) {
     Object.keys(this.nodeDefinition.attrs).forEach((k) =>
       fn(k, this.nodeDefinition.attrs[k]));
   }
@@ -228,7 +228,7 @@ class TagNodeInstance extends NodeInstance {
 
   _activate() {
     this.computations = [];
-    this.eachDefinitionAttr((k, v) => {
+    this._eachDefinitionAttr((k, v) => {
       if (_is(v, "Array"))
         this.computations.push(tracker.autorun(() => {
           let str = v.length > 1
@@ -306,7 +306,6 @@ class CondNodeInstance extends NodeInstance {
   }
 }
 
-// TODO: rename HtmlNode etc.
 
 // Loop
 
@@ -472,7 +471,8 @@ class ComponentNodeInstance extends NodeInstance {
 // TODO: tests.
 
 module.exports = {
-  mount, text, html, tag, cond, loop, dynamic, component
+  mount, text, tag, cond, loop, dynamic, component,
+  dom: list
 }
 
 // html, head and body are not included.
