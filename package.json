@@ -1,6 +1,6 @@
 {
   "name":        "zodiac",
-  "version":     "0.1.7",
+  "version":     "0.1.8",
   "description": "Reactive web component microframework based on Tracker",
   "keywords": [
     "reactive",
