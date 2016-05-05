@@ -82,6 +82,7 @@ function mount(dom, root) {
   var m = new Mounting();
   m.dom = dom;
   m.root = root.render(m);
+  m.toggle();
   return m;
 }
 

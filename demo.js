@@ -19,3 +19,9 @@ state.persistence = z.persist(state, {
       JSON.stringify(state.get()))
 });
 
+z.mount(document.body, dom(
+  h1("Hello"),
+  p("This is a test.."),
+  p([state.get])
+));
+
