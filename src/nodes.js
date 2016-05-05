@@ -312,6 +312,8 @@ class CondNodeInstance extends NodeInstance {
 class LoopNode {
 
   constructor(listSource, body) {
+    if (typeof(body) != "function")
+      throw new Error("loop body must be a function");
     this.isReactive = typeof(listSource) == "function";
     this.listSource = listSource;
     this.body = body;
@@ -328,13 +330,19 @@ function loop(listSource, body) {
 
 class LoopNodeInstance extends NodeInstance {
 
+  _mapBodyInstances(ndf) {
+    let i = 0;
+    let source = ndf.isReactive ? ndf.listSource() : ndf.listSource;
+    this.bodyInstances = source.map((m) => {
+      let item = () => m;
+      let index = ((ix) => () => ix)(i++);
+      return tagify(ndf.body(item, index)).render(this);
+    });
+  }
+
   subConstructor() {
     let ndf = this.nodeDefinition;
-    if (!ndf.isReactive) {
-      this.bodyInstances = ndf.listSource.map((m) => {
-        return ndf.body(() =>m).render(this);
-      });
-    }
+    if (!ndf.isReactive) this._mapBodyInstances(ndf);
   }
 
   _activate() {
@@ -343,9 +351,7 @@ class LoopNodeInstance extends NodeInstance {
       this.computation = tracker.autorun(() => {
         if (this.active)
           for (var c of this.bodyInstances) c.deactivate();
-        this.bodyInstances = ndf.listSource().map((m) => {
-          return ndf.body(() => m).render(this);
-        });
+        this._mapBodyInstances(ndf);
         for (var c of this.bodyInstances) c.activate();
       });
     }

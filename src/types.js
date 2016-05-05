@@ -1,26 +1,84 @@
 
 const tracker = require("./tracker");
+const Clob   = require("./clob");
+
+
+
+function eachKV(obj, fn) {
+  Object.keys(obj).forEach((k) => fn(k, obj[k]));
+}
+
+
+
+const valMixin = {
+  _init: (self, val) => {
+    self.dep = new tracker.Dependency();
+    self.set(val);
+  },
+
+  depend: (self) => self.dep.depend(),
+
+  set: (self, val) => {
+    if (self.$.validate) self.$.validate(val);
+    if (self.val === val) return;
+    self.val = self.$.copyVal ? self.$.copyVal(val) : val;
+    self.dep.changed();
+  },
+
+  get: (self) => {
+    self.dep.depend();
+    return self.$.copyVal ? self.$.copyVal(self.val) : self.val;
+  },
+
+  modify: (self, fn) => {
+    return self.set(fn(self.val));
+  }
+};
+
+const numMixin = {
+  $validate: (val) => {
+    if (typeof val === "number") return;
+    console.log(val);
+    throw new Error("z.num expected a number");
+  },
+
+  inc: (self) => {
+    self.dep.changed();
+    return ++self.val;
+  },
+
+  dec: (self) => {
+    self.dep.changed();
+    return --self.val;
+  }
+};
+
+const strMixin = {
+  $validate: (val) => {
+    if (typeof val === "string") return;
+    console.log(val);
+    throw new Error("z.str expected a string");
+  }
+};
+
+const boolMixin = {
+  $validate: (val) => {
+    if (typeof val === "boolean") return;
+    console.log(val);
+    throw new Error("z.bool expected a boolean");
+  },
+  toggle: (self) => self.set(!self.val)
+};
 
 const types = module.exports = {
-
-  var: function (value=undefined) {
-    let dep = new tracker.Dependency();
-    return {
-      dep: dep,
-      set: function (v) {
-        if (v === value) return;
-        value = v;
-        dep.changed();
-      },
-      get: function () {
-        dep.depend();
-        return value;
-      }
-    };
-  },
+  val:  Clob(function ZVal()  {}, valMixin),
+  num:  Clob(function ZNum()  {}, valMixin, numMixin),
+  str:  Clob(function ZStr()  {}, valMixin, strMixin),
+  bool: Clob(function ZBool() {}, valMixin, boolMixin),
 
   dict: function (vals={}) {
     let deps = {};
+    vals = Object.assign({}, vals);
     return {
       deps: deps,
       set: function (name, val) {
@@ -35,6 +93,25 @@ const types = module.exports = {
         return vals[name];
       }
     }
+  },
+
+  list: function (vals) {
+  // z.list
+  //   push
+  //   pop
+  //   shift
+  //   unshift
+  //   slice
+  //   splice
+  //   dropAt
+  //   drop
+  //   mapValues
+  //   filter
+  //   reduce
+  //   // flatten
+  //   // flatMap
+  //   pushStream // returns the stream
+  //   shiftStream
   },
 
   ticker: function (interval=1000) {
@@ -94,200 +171,25 @@ const types = module.exports = {
     };
   },
 
-  persistent: function(ctor, name, defaultValue) {
-    let item = localStorage.getItem(name) || defaultValue;
-    let variable = ctor(item);
-    tracker.autorun(() => localStorage.setItem(name, variable.get()));
-    return variable;
-  }
+  persist: function(state, {getter, setter}) {
+    let saved = z.bool(false);
+    state.set(getter());
 
-}
-
-
-
-function eachKV(obj, fn) {
-  Object.keys(obj).forEach((k) => fn(k, obj[k]));
-}
-
-class Atom {
-  constructor(val) {
-    this._dep = new tracker.Dependency();
-    if (this.subConstructor) this.subConstructor();
-    if (val !== undefined) this.set(val);
-  }
-
-  // Return the sub-atom at the given location, or throw an error if it
-  // does not exist.
-  sel(...path) {
-    let fragments = [].concat.apply(
-      path.map((p) => typeof(p) == "string" ? p.split('/') : p))
-      .filter((p) => p !== undefined);
-    return fragments.length == 0
-      ? this
-      : this._sel(fragments);
-  }
-
-  _strictSel(path) {
-    let subAtom = this.sel(...path);
-    if (!subAtom) {
-      console.log(path);
-      throw new Error('Nonexistent scope.');
-    }
-    return subAtom;
-  }
-
-  // Returns a getter for this atom or an optionally specified sub-atom
-  stream(...path) {
-    let atom = this._strictSel(path);
-    atom._dep.depend();
-    return atom._get;
-  }
-
-  // Returns the value of this atom or an optionally specified sub-atom
-  get(...path) { return this.stream(...path)(); }
-
-  // Sets the value of this atom or an optionally specified sub-atom
-  set(...pathAndVal) {
-    let
-      val    = pathAndVal.pop(),
-      path   = pathAndVal;
-    return this.sel(...path)._set(val);
-  }
-
-  _changed() {
-    this._dep.changed();
-    if (this._parent) this._parent._changed();
-  }
-
-  modify(fn) { this.set(fn(this.get())); }
-}
-
-class ValueAtom extends Atom {
-  _validate(val) {
-    let valid = !val
-      || typeof(val) == 'boolean'
-      || typeof(val) == 'string'
-      || typeof(val) == 'number';
-    if (valid) return;
-    console.log(val);
-    throw new Error('Value atom expected string, number or falsey type.');
-  }
-
-  _sel()    { return undefined; }
-  _get(val) { return this._val }
-
-  _set(val) {
-    if (this._val === val) return false;
-    this._validate(val);
-    this._val = val;
-    this._changed();
-    return true;
-  }
-
-  inc()   { this._val++; this._changed(); }
-  dec()   { this._val--; this._changed(); }
-  flip()  { this._val = !this._val; this._changed(); }
-}
-
-class ListOrObjectAtom extends Atom {
-  subConstructor() {
-    this._subAtoms = new this._getBaseType()();
-  }
-
-  each() {
-    for (var i=0; i<this._subAtoms.length; i++)
-      fn(this._subAtoms[i], i);
-  }
-
-  _validate(val) {
-    if (val.constructor !== this._getBaseType()) {
-      console.log(val);
-      throw new Error("Expected an " + this._getBaseType().name);
-    }
-  }
-
-  _sel(...scope) {
-    let
-      key = scope.shift(),
-      sub = this._subAtoms[key];
-    if (!sub) return undefined;
-    return sub.sel(...scope);
-  }
-
-  _get() {
-    let r = new this._getBaseType()();
-    eachKV(this._subAtoms, (k, v) => r[k] = v._get());
-    return r;
-  }
-
-  _set(val) {
-    this._validate(val);
-    let changed = false;
-    eachKV(val, (k, v) => {
-      if (this._subAtoms[k] === undefined) {
-        this._subAtoms[k] = atom(v, this);
-        this._subAtoms[k]._parent = this;
-        changed = true;
-      }
-      else if (this._subAtoms[k]._set(v)) changed = true;
+    tracker.autorun(() => {
+      state.depend();
+      saved.set(false);
     });
-    return changed;
+
+    saved.set(true);
+
+    return {
+      save: () => {
+        setter(state);
+        saved.set(true);
+      },
+      reload: () => state.set(getter()),
+      saved
+    };
   }
 }
 
-class ListAtom extends ListOrObjectAtom {
-  _getBaseType() { return Array; }
-
-  push(val) {
-    this._subAtoms.push(atom(val));
-    this._dep.changed();
-  }
-
-  pop(val) {
-    if (this._subAtoms.length == 0) return undefined;
-    this._dep.changed();
-    return this._subAtoms.pop().get();
-  }
-
-  shift(val) {
-    if (this._subAtoms.length == 0) return undefined;
-    this._dep.changed();
-    return this._subAtoms.shift().get();
-  }
-
-  unshift(val) {
-    this._subAtoms.unshift(atom(val));
-    this._dep.changed();
-  }
-
-  // TODO: drop, filter, insert
-}
-
-class ObjectAtom extends ListOrObjectAtom {
-  _getBaseType() { return Object; }
-}
-
-// function atomFromKey(k) {
-//   switch (k.constructor) {
-//     case String:  return atom({});
-//     case Number:  return atom([]);
-//     default:
-//       console.log(k);
-//       throw "Unsupported atom key type.";
-//   }
-// }
-
-function atom(v) {
-  switch (v.constructor) {
-    case Array:   return new ListAtom(v);
-    case Object:  return new ObjectAtom(v);
-    case String:
-    case Boolean:
-    case Number:  return new ValueAtom(v);
-    default:
-      console.log(v);
-      throw new Error("Unsupported Atom type.");
-  }
-}
-
-types.atom = atom;
