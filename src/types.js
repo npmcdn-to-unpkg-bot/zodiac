@@ -1,81 +1,84 @@
 
 const tracker = require("./tracker");
-const Clob   = require("./clob");
-
-
 
 function eachKV(obj, fn) {
   Object.keys(obj).forEach((k) => fn(k, obj[k]));
 }
 
+function zVal(val) {
+  this.prototype = {};
 
+  this.dep = new tracker.Dependency();
+  this.depend = () => this.dep.depend();
 
-const valMixin = {
-  _init: (self, val) => {
-    self.dep = new tracker.Dependency();
-    self.set(val);
-  },
+  this.get = () => {
+    this.dep.depend();
+    return this.prototype.copyVal
+      ? this.prototype.copyVal(this._val)
+      : this._val;
+  };
 
-  depend: (self) => self.dep.depend(),
+  this.set = (val) => {
+    if (this.prototype.validate) this.prototype.validate(val);
+    if (this._val === val) return;
+    this._val = this.prototype.copyVal
+      ? this.prototype.copyVal(val)
+      : val;
+    this.dep.changed();
+  };
 
-  set: (self, val) => {
-    if (self.$.validate) self.$.validate(val);
-    if (self.val === val) return;
-    self.val = self.$.copyVal ? self.$.copyVal(val) : val;
-    self.dep.changed();
-  },
+  this.set(val);
+}
 
-  get: (self) => {
-    self.dep.depend();
-    return self.$.copyVal ? self.$.copyVal(self.val) : self.val;
-  },
+function zNum(val) {
+  zVal.call(this, val);
 
-  modify: (self, fn) => {
-    return self.set(fn(self.val));
-  }
-};
-
-const numMixin = {
-  $validate: (val) => {
+  this.prototype.validate = (val) => {
     if (typeof val === "number") return;
     console.log(val);
     throw new Error("z.num expected a number");
-  },
+  };
 
-  inc: (self) => {
-    self.dep.changed();
-    return ++self.val;
-  },
+  this.inc = () => {
+    this.dep.changed();
+    return ++this._val;
+  };
 
-  dec: (self) => {
-    self.dep.changed();
-    return --self.val;
-  }
-};
+  this.dec = () => {
+    this.dep.changed();
+    return --this._val;
+  };
+}
 
-const strMixin = {
-  $validate: (val) => {
+function zStr(val) {
+  zVal.call(this, val);
+
+  this.prototype.validate = (val) => {
     if (typeof val === "string") return;
     console.log(val);
     throw new Error("z.str expected a string");
-  }
-};
+  };
+}
 
-const boolMixin = {
-  $validate: (val) => {
+function zBool(val) {
+  zVal.call(this, val);
+
+  this.prototype.validate = (val) => {
     if (typeof val === "boolean") return;
     console.log(val);
     throw new Error("z.bool expected a boolean");
-  },
-  toggle: (self) => self.set(!self.val)
-};
+  };
+
+  this.toggle = () => this.set(!this._val);
+}
 
 const types = module.exports = {
-  val:  Clob(function ZVal()  {}, valMixin),
-  num:  Clob(function ZNum()  {}, valMixin, numMixin),
-  str:  Clob(function ZStr()  {}, valMixin, strMixin),
-  bool: Clob(function ZBool() {}, valMixin, boolMixin),
+  val:  () => new zVal(...arguments),
+  num:  () => new zNum(...arguments),
+  str:  () => new zStr(...arguments),
+  bool: () => new zBool(...arguments),
 
+  // TODO...
   dict: function (vals={}) {
     let deps = {};
     vals = Object.assign({}, vals);
