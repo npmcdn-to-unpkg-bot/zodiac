@@ -2,3 +2,5 @@
 render atoms directly
 proxy atom given to loop callback
 don't require array wrap
+
+// TODO: webpack hot reloader?

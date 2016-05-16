@@ -1,5 +1,10 @@
 
-// TODO: import tags and reactive vars
+import z from "zodiac";
+
+const {
+  dom, cond, loop,
+  span, h1, p, a, ul, li, input
+} = z.template;
 
 function TodoCreator(actions) {
   const text = z.str("");
@@ -75,14 +80,18 @@ function TodoList(list) {
 }
 
 function RootView(model) {
-  return
-    html(
-      h1("Another amazing todo-list"),
-      TodoList(model.todoList),
-      TodoCreator(model.todoList),
-      p(
-        a({href: "#", $click: () => model.destroyCompleted()},
-          "Remove completed")));
+  return dom(
+    h1("Another amazing todo-list"),
+    TodoList(model.todoList),
+    TodoCreator(model.todoList),
+    p(
+      a({
+        href: "#",
+        $click: () => model.destroyCompleted()
+        },
+        "Remove completed")
+    )
+  );
 }
 
 export default RootView;

@@ -1,17 +1,21 @@
 
-var path    = require('path');
-var webpack = require('webpack');
+const path    = require('path');
+const webpack = require('webpack');
+
+const buildPath = './dev-server'
 
 module.exports = {
-  entry: ['./demo.js'],
+  entry: ['./dev-server.js'],
   output: {
-    path: path.resolve(__dirname, '.'),
-    filename: 'demo.bundle.js'
+    path: path.resolve(__dirname, buildPath),
+    filename: 'bundle.js'
   },
   devServer: {
     port: 8080,
     host: "0.0.0.0",
-    inline: true
+    inline: true,
+    contentBase: buildPath,
+    historyApiFallback: true
   },
   module: {
     loaders: [

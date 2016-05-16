@@ -1,29 +1,31 @@
 
-function RootModel(store) {
+function RootModel(state) {
   return {
-    todoList: TodoListModel(Store.todos);
+    todos: TodosModel(state.todos);
   }
 }
 
-function TodoListModel(todos) {
+function TodosModel(todos) {
   return {
     create: name => todos.push({
       checked: z.bool(false),
-      name:    z.str(name)
+      name: z.str(name)
     })
-    // TODO:
-    items: () => todos.mapStream(t => TodoModel(t, todos));
-    destroyCompleted: () => null; // TODO...
-  }
+
+    items: () =>
+      todos.get().map(t => TodoModel(t, todos)),
+
+    destroyCompleted: () =>
+      null // TODO...
+  })
 }
 
 function TodoModel(todo, todos) {
   return {
-    name:    todo.name, // use spread operator?
+    name:    todo.name,
     checked: todo.checked,
-    destroy: todo => todos.drop(todo);
+    destroy: todo => todos.drop(todo)
   }
 }
 
 export default RootModel;
-

@@ -5,39 +5,24 @@ function eachKV(obj, fn) {
   Object.keys(obj).forEach((k) => fn(k, obj[k]));
 }
 
-function zVal(val) {
-  this.prototype = {};
-
+function Variable(val) {
   this.dep = new tracker.Dependency();
-  this.depend = () => this.dep.depend();
+  this.watch = () => this.dep.depend();
 
   this.get = () => {
     this.dep.depend();
-    return this.prototype.copyVal
-      ? this.prototype.copyVal(this._val)
-      : this._val;
+    return this._val;
   };
 
   this.set = (val) => {
-    if (this.prototype.validate) this.prototype.validate(val);
     if (this._val === val) return;
-    this._val = this.prototype.copyVal
-      ? this.prototype.copyVal(val)
-      : val;
+    this._val = val;
     this.dep.changed();
   };
 
   this.set(val);
-}
 
-function zNum(val) {
-  zVal.call(this, val);
-
-  this.prototype.validate = (val) => {
-    if (typeof val === "number") return;
-    console.log(val);
-    throw new Error("z.num expected a number");
-  };
+  this.toggle = () => this.set(!this._val);
 
   this.inc = () => {
     this.dep.changed();
@@ -48,35 +33,33 @@ function zNum(val) {
     this.dep.changed();
     return --this._val;
   };
-}
 
-function zStr(val) {
-  zVal.call(this, val);
+  this.push = (val) => {
+    this.dep.changed();
+    this._val.push(val);
+  };
 
-  this.prototype.validate = (val) => {
-    if (typeof val === "string") return;
-    console.log(val);
-    throw new Error("z.str expected a string");
+  this.pop = (val) => {
+    if (this._val.length > 0) this.dep.changed();
+    return this._val.pop();
+  };
+
+  this.unshift = (val) => {
+    this.dep.changed();
+    this._val.unshift(val);
+  };
+
+  this.shift = (val) => {
+    if (this._val.length > 0) this.dep.changed();
+    return this._val.shift();
   };
 }
 
-function zBool(val) {
-  zVal.call(this, val);
-
-  this.prototype.validate = (val) => {
-    if (typeof val === "boolean") return;
-    console.log(val);
-    throw new Error("z.bool expected a boolean");
-  };
-
-  this.toggle = () => this.set(!this._val);
-}
+// TODO: clone on set, clone on get.
+// TODO: cleanup
 
 const types = module.exports = {
-  val:  () => new zVal(...arguments),
-  num:  () => new zNum(...arguments),
-  str:  () => new zStr(...arguments),
-  bool: () => new zBool(...arguments),
+  variable:  (...args) => new Variable(...args),
 
   // TODO...
   dict: function (vals={}) {
@@ -175,11 +158,11 @@ const types = module.exports = {
   },
 
   persist: function(state, {getter, setter}) {
-    let saved = z.bool(false);
+    let saved = z.variable(false);
     state.set(getter());
 
     tracker.autorun(() => {
-      state.depend();
+      state.watch();
       saved.set(false);
     });
 
