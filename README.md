@@ -5,32 +5,44 @@
 
 ---
 
-**Work in progress... Better examples coming...**
+**Work in progress. Documentation is coming.**
 
-Zodiac includes:
+Zodiac is a simple but powerful client side toolkit for writing reactive web applications. Let's see it in action:
+
+    TODO: simple example
+
+[More examples](./tree/master/examples)
+
+ Zodiac provides:
 
 - A way to track changes in data (using reactive variables)
 - An HTML template syntax (using pure javascript)
 - Live (reactive) dom rendering
 - A suggested standard architecture (fully optional)
+- Web components
 
-Let's see it in action:
+It also contains:
 
-    TODO
+- A reactive router
+- Various other useful sources of reactivity (variables, time, alerts)
+- A reactivity model copied from Meteor Tracker
 
-[More examples](./tree/master/examples)
+Some benefits over React:
 
-
-#### Advantages over React
-
-- Faster, probably close to optimal rendering speed
-- Smaller (~15kb minified)
+- Very fast, close to optimal renderer
+- Less than 30k minified
 - Less boilerplate needed to make stuff work
 - Components don't have to be wrapped in a tag
 - Iterators don't need a key attribute to work
-- No DOM noise. No id's, classes or superflous tags added unless you add them yourself.
+- No DOM noise. No id's, classes or superfluous tags added unless you add them yourself.
+- Simpler API
 
-How is this possible? Well, there is no DOM diffing, which means no uneccessary redraws. Instead the renderer generates a live template instantiation tree. The template instantiation nodes listen for reactive changes, directly updating their corresponding DOM nodes as needed. No unecccesary computations take place, and everything works smoothly.
+How is this possible? Well, everything is leaner, and there is no DOM diffing, which means no unnecessary redraws. Instead the renderer generates a live template instantiation tree. The template instantiation nodes listen for reactive changes, directly updating their corresponding DOM nodes as needed. No unnecessary computations take place, and everything works smoothly.
+
+There are some limitations:
+
+- Client side only
+- IE9 and later (no support for legacy browsers)
 
 #### Development
 
