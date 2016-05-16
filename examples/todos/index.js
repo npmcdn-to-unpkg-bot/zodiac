@@ -10,4 +10,4 @@ const model    = RootModel(store);
 const view     = RootView(model);
 const instance = mount(document.body, view);
 
-window.instance = instance(); // Just to make debugging easier
+window.instance = instance; // Just to make debugging easier
