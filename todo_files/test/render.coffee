@@ -1,6 +1,6 @@
 Template = require "../src/zodiac/template"
 Reactive = require "../src/zodiac/reactive"
-render   = require "../src/zodiac/render"
+render   = require "../render"
 
 
 describe "Zodiac", ->
