@@ -11,7 +11,7 @@ Zodiac is a simple but powerful client side toolkit for writing reactive web app
 
     TODO: simple example
 
-[More examples](./tree/master/examples)
+[More examples](examples)
 
  Zodiac provides:
 
