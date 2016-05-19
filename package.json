@@ -23,6 +23,7 @@
     "prepublish": "npm run build",
     "build": "babel ./src --out-dir dist",
     "dev": "webpack-dev-server",
+    "test": "mocha",
     "phantomtest": "npm run build && node_modules/.bin/mocha-phantomjs ./test/index.html"
   },
   "devDependencies": {

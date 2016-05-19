@@ -1,4 +1,8 @@
 
+// templates.js
+//
+// This file contains the reactive DOM implementation that is the core of Zodiac. It is the most complicated part, and I hope i will get around to writing some sort of explanation once it is 100%-ish finished.
+
 const tracker = require("./tracker");
 
 class NodeInstance {
@@ -307,7 +311,6 @@ class CondNodeInstance extends NodeInstance {
   }
 }
 
-
 // Loop
 
 class LoopNode {
@@ -435,7 +438,7 @@ class DynamicNodeInstance extends NodeInstance {
   descendants() { return this.children; }
 }
 
-// Component
+// Component (experimental feature)
 
 class ComponentNode {
 
@@ -472,8 +475,6 @@ class ComponentNodeInstance extends NodeInstance {
 
   descendants() { return [this.template]; }
 }
-
-// TODO: tests.
 
 module.exports = {
   mount, text, tag, cond, loop, dynamic, component,

@@ -1,15 +1,21 @@
 
-import z from "./src/zodiac";
-const {
+import {
+  $, IntervalTimer,
+  mount,
   cond, loop, dynamic, component, tag, text, dom,
   div, strong, ul, li, input, button, hr, span,
   h1, h2, h3, h4, p, a
-} = z.template;
+} from "../src/zodiac";
 
-const $ = z.variable;
+window.z = require("./../src/zodiac");
 
 const state = $(0);
 window.state = state;
+
+const
+  ticker = $(0),
+  timer = IntervalTimer(50, ticker.inc);
+
 
 const todos = $([
   {
@@ -38,10 +44,9 @@ state.persistence = z.persist(state, {
       JSON.stringify(state.get()))
 });
 
-
 z.mount(document.body, dom(
   h1("Hello"),
-  p("This is a test.."),
+  p("This is a test.. ", [ticker.get]),
   p({$click: state.inc}, [state.get]),
   p(
     a({href: "#", $click: state.persistence.save}, "Save")
@@ -60,4 +65,3 @@ z.mount(document.body, dom(
   },
     "Remove todo")
 ));
-

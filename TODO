@@ -1,10 +1,10 @@
 
-
-More efficient loops by trimming and changing function
-Have reactive router support sub-paths
-Webpack hot reloader?
-
+Pending:
+- More efficient loops by trimming and changing reactive getter
+- Integrate reactive router
+- Have reactive router support sub-paths
 
 Considerations:
 - Don't require array wrap?
 - Or allow reactive variables directly to infer .get?
+- Webpack hot reloading as part of the architecture?

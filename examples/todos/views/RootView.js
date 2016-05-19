@@ -7,47 +7,79 @@ const {
 } = z.template;
 
 function TodoCreator(actions) {
-  const text = z.str("");
+  const value = z.str("");
 
-  function inputEv(e) { text.set(e.value); }
+  function $input(e) { text.set(e.value); }
 
-  function keyEv(e) {
-    if (e.keyCode != 13) return;
+  function $keyPress(e) {
+    if (e.keyCode !== 13) return;
     actions.create(e.value);
     text$.set("");
   }
 
   return input({
     type: 'text',
-    $input: inputEv,
-    $keyPress: keyEv,
-    value: text,
+    $input,
+    $keyPress,
+    value,
     placeholder: "Create todo..."
   });
 }
 
-function TodoItem(item) {
-  const editing = z.bool(false);
+function QuickInput({value, placeholder, $submit, $blur}) {
+  return input({
+    __activated: (ev) => ev.target.select(), // autofocus on input
+    value: [value.get],
+    $input: $.targetValue(value.set),
+    $keyup: $.ifEnter($submit),
+    $blur
+  });
+}
 
-  function deleteClickEv(e) { item.destroy(); }
-  function textClickEv(e)   { editing.toggle(); }
-  function inputBlurEv(e)   { editing.toggle(); }
-  function keyupEv(e)       { if (e.keyCode == 13) editing.toggle(); }
-  function inputEv(e)       { item.setName(e.target.value); }
+function ClickToEdit({$submit, Editor, View}) {
+  const editing = $(false);
 
-  function labelText() {
-    let text = item.getText();
-    return text.length > 0 ? text : "(unnamed todo)";
+  return cond(editing.get,
+    Editor({
+      $submit: () => {
+        editing.set(false);
+        $submit();
+      },
+      $blur: () => editing.set(false)
+    }),
+    View({
+      $click: () => editing.set(true)
+    })
+  );
+}
+
+function ClickToEditTodoName({item}) {
+  const value = z.follow(item.getName);
+
+  function onSubmit() {
+    item.setName(value.get())
   }
 
-  const todoTextInput = input({
-    type: "text",
-    __activated: (ev) => ev.target.select(), // focus on render
-    value: [item.text.get],
-    $keyup: keyupEv,
-    $blur:  inputBlurEv,
-    $input: inputEv
-  });
+  function Editor({$submit, $blur}) {
+    return QuickInput({
+      placeholder: "New item..."
+      value, $submit, $blur
+    });
+  }
+
+  function View({$click}) {
+    return span({
+      $click,
+      "class": [() => item.checked.get() && "checked"]
+    }, [item.label]);
+  }
+
+  return ClickToEdit({Editor, View, onSubmit});
+}
+
+function TodoItem(item) {
+
+  function onDeleteClick(e) { item.destroy(); }
 
   return li(
     input({
@@ -55,19 +87,11 @@ function TodoItem(item) {
       checked: [item.checked.get],
       $click: item.checked.toggle
     }),
-
-    cond(editing.get,
-      todoTextInput,
-      span({
-        $click: textClickEv,
-        "class": [() => item.checked.get() && "checked"]
-      },
-        [labelText]
-      )),
+    ClickToEditTodoName({item}),
     " ",
     a({
       href: "#",
-      $click: deleteClickEv},
+      $click: onDeleteClick},
       "[Delete]"
     )
   );

@@ -5,7 +5,7 @@ const webpack = require('webpack');
 const buildPath = './dev-server'
 
 module.exports = {
-  entry: ['./dev-server.js'],
+  entry: ['./dev-server/index.js'],
   output: {
     path: path.resolve(__dirname, buildPath),
     filename: 'bundle.js'

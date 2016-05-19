@@ -22,9 +22,14 @@ function TodosModel(todos) {
 
 function TodoModel(todo, todos) {
   return {
-    name:    todo.name,
+    name: todo.name,
+    label: () => {
+      const text = todo.name.get();
+      return text.length > 0 ? text : "(unnamed todo)";
+    }
     checked: todo.checked,
     destroy: todo => todos.drop(todo)
+
   }
 }
 

@@ -1,14 +1,19 @@
 
 
-const tracker  = require("./tracker");
-const types    = require("./types");
-const template = require("./nodes");
+const tracker    = require("./tracker");
+const variables  = require("./variables");
+const templates  = require("./templates");
+const utils      = require("./utils");
 
-const z = module.exports = {
-  tracker, types, template,
-  mount: template.mount
+const Zodiac = {
+  ...variables,
+  ...utils,
+  ...templates,
+  autorun: tracker.autorun,
+  nonreactive: tracker.nonreactive
 };
 
-if (window) window.z = z;
+module.exports = Zodiac;
 
-Object.assign(z, tracker, types);
+if (typeof window !== "undefined")
+  window.Zodiac = Zodiac;
