@@ -1,13 +1,14 @@
 
 import { mount } from "zodiac";
 
-import RootStore from "./store/RootStore";
-import RootModel from "./models/RootModel";
-import RootView  from "./views/App";
+import createStore from "./store/createStore";
+import Model from "./models/RootModel";
+import View  from "./views/App";
 
-const store    = RootStore();
-const model    = RootModel(store);
-const view     = RootView(model);
-const instance = mount(document.body, view);
+const
+  store    = createStore(),
+  model    = Model(store),
+  view     = View(model),
+  instance = mount(document.body, view);
 
 window.instance = instance; // Just to make debugging easier

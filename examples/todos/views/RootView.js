@@ -1,27 +1,27 @@
 
-import z from "zodiac";
-
-const {
+import {
+  $, follow,
+  targetValue, ifEnter,
   dom, cond, loop,
   span, h1, p, a, ul, li, input
-} = z.template;
+} from "zodiac";
 
-function TodoCreator(actions) {
-  const value = z.str("");
+function TodoCreator(todos) {
+  const value = $("");
 
-  function $input(e) { text.set(e.value); }
+  function $input(e) { value.set(e.value); }
 
-  function $keyPress(e) {
+  function $keyup(e) {
     if (e.keyCode !== 13) return;
-    actions.create(e.value);
-    text$.set("");
+    todos.create(e.value);
+    value.set("");
   }
 
   return input({
     type: 'text',
     $input,
-    $keyPress,
-    value,
+    $keyup,
+    value: [value.get],
     placeholder: "Create todo..."
   });
 }
@@ -30,8 +30,8 @@ function QuickInput({value, placeholder, $submit, $blur}) {
   return input({
     __activated: (ev) => ev.target.select(), // autofocus on input
     value: [value.get],
-    $input: $.targetValue(value.set),
-    $keyup: $.ifEnter($submit),
+    $input: targetValue(value.set),
+    $keyup: ifEnter($submit),
     $blur
   });
 }
@@ -54,15 +54,15 @@ function ClickToEdit({$submit, Editor, View}) {
 }
 
 function ClickToEditTodoName({item}) {
-  const value = z.follow(item.getName);
+  const value = follow(() => item().name.get());
 
   function onSubmit() {
-    item.setName(value.get())
+    item().name.set(value.get())
   }
 
   function Editor({$submit, $blur}) {
     return QuickInput({
-      placeholder: "New item..."
+      placeholder: "New item...",
       value, $submit, $blur
     });
   }
@@ -70,8 +70,8 @@ function ClickToEditTodoName({item}) {
   function View({$click}) {
     return span({
       $click,
-      "class": [() => item.checked.get() && "checked"]
-    }, [item.label]);
+      "class": [() => item().checked.get() && "checked"]
+    }, [() => item().label()]);
   }
 
   return ClickToEdit({Editor, View, onSubmit});
@@ -84,8 +84,8 @@ function TodoItem(item) {
   return li(
     input({
       type: "checkbox",
-      checked: [item.checked.get],
-      $click: item.checked.toggle
+      checked: [() => item().checked.get()],
+      $click: () => item().checked.toggle
     }),
     ClickToEditTodoName({item}),
     " ",
@@ -103,19 +103,23 @@ function TodoList(list) {
   );
 }
 
-function RootView(model) {
+function Todos(todos) {
   return dom(
     h1("Another amazing todo-list"),
-    TodoList(model.todoList),
-    TodoCreator(model.todoList),
+    TodoList(todos),
+    TodoCreator(todos),
     p(
       a({
         href: "#",
-        $click: () => model.destroyCompleted()
+        $click: () => todos.destroyCompleted()
         },
         "Remove completed")
     )
   );
 }
 
-export default RootView;
+function App(model) {
+  return Todos(model.todos);
+}
+
+export default App;
