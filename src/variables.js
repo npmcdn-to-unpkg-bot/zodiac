@@ -107,7 +107,7 @@ function ZVariable(value) {
     reset, consume,
     toggle,
     inc, dec,
-    push, pop, unshift, shift
+    push, pop, unshift, shift, length, filter, drop
   });
 }
 
