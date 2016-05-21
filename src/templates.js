@@ -316,11 +316,11 @@ class CondNodeInstance extends NodeInstance {
 class LoopNode {
 
   constructor(listSource, body) {
-    if (typeof(body) != "function")
-      throw new Error("loop body must be a function");
     this.isReactive = typeof(listSource) == "function";
     this.listSource = listSource;
-    this.body = body;
+    this.body = body || (v => v);
+    if (typeof(this.body) != "function")
+      throw new Error("loop body must be a function");
   }
 
   render(parentNodeInstance) {
