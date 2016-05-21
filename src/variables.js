@@ -78,6 +78,23 @@ function ZVariable(value) {
     return value.shift();
   }
 
+  // Array convenience method
+  function length() {
+    dep.depend();
+    return value.length;
+  }
+
+  // Array convenience method
+  function filter(fn) {
+    value = value.filter(fn);
+    dep.changed();
+  }
+
+  // Array convenience method
+  function drop(item) {
+    filter(e => e !== item);
+  }
+
   // Reset this variable, and return the value that was overwritten.
   function consume() {
     const result = value;
