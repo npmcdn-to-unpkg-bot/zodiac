@@ -338,9 +338,7 @@ class LoopNodeInstance extends NodeInstance {
     let i = 0;
     let source = ndf.isReactive ? ndf.listSource() : ndf.listSource;
     this.bodyInstances = source.map((m) => {
-      let item = () => m;
-      let index = ((ix) => () => ix)(i++);
-      return tagify(ndf.body(item, index)).render(this);
+      return tagify(ndf.body(m, i++)).render(this);
     });
   }
 
