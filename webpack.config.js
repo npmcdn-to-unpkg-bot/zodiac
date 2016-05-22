@@ -17,15 +17,10 @@ module.exports = {
     historyApiFallback: true
   },
   module: {
-    loaders: [
-      {
-        test: /\.js$/,
-        loader: 'babel',
-      }
-    ]
+    loaders: require("./webpack.loaders")
   },
   stats: {
     colors: true
   },
-  devtool: 'inline-source-map'
+  devtool: 'source-map'
 };

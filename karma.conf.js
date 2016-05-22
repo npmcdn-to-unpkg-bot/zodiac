@@ -14,21 +14,26 @@ module.exports = function(config) {
     // config.LOG_INFO || config.LOG_DEBUG
 
     frameworks: ['jasmine'],
-    reporters:  ['progress'],
-    browsers:   ["PhantomJS"],
+    reporters:  ['spec'],
+    browsers:   [],
 
     files: [
       'node_modules/babel-polyfill/dist/polyfill.js',
-      'test/**/*.js'
+      'test/**/*.coffee'
     ],
 
-    exclude:     [],
+    exclude: [],
 
     preprocessors: {
-      'test/**/*.js': ['webpack', 'sourcemap'],
+      'test/**/*.coffee': ['webpack', 'sourcemap'],
       'src/**/*.js': ['webpack', 'sourcemap']
     },
 
-    webpack: require("./webpack.config.js")
+    webpack: {
+      module: {
+        loaders: require("./webpack.loaders.js"),
+      },
+      devtool: 'inline-source-map'
+    }
   });
 }
