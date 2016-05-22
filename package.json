@@ -1,6 +1,6 @@
 {
-  "name":        "zodiac",
-  "version":     "0.1.15",
+  "name": "zodiac",
+  "version": "0.1.15",
   "description": "Reactive web component microframework based on Tracker",
   "keywords": [
     "reactive",
@@ -16,30 +16,30 @@
     "url": "https://github.com/jbe/zodiac/issues"
   },
   "license": "MIT",
-  "author":  "Jostein B. Eliassen (http://jostein.be)",
-  "main":    "dist/zodiac.js",
+  "author": "Jostein B. Eliassen (http://jostein.be)",
+  "main": "dist/zodiac.js",
   "repository": "jbe/zodiac.git",
   "scripts": {
-    "prepublish": "npm run build",
+    "prepublish": "npm test && npm run build",
     "build": "babel ./src --out-dir dist",
     "dev": "webpack-dev-server",
-    "test": "mocha",
-    "phantomtest": "npm run build && node_modules/.bin/mocha-phantomjs ./test/index.html"
+    "test": "karma"
   },
   "devDependencies": {
     "babel-cli": "*",
     "babel-core": "*",
     "babel-loader": "*",
-    "babel-preset-es2016": "*",
-    "babel-preset-stage-0": "*",
     "babel-plugin-transform-object-rest-spread": "*",
     "babel-polyfill": "*",
-    "http-server": "*",
+    "babel-preset-es2016": "*",
+    "jasmine": "^2.4.1",
+    "karma": "^0.13.22",
+    "karma-babel-preprocessor": "^6.0.1",
+    "karma-jasmine": "^1.0.2",
+    "karma-phantomjs-launcher": "^1.0.0",
+    "karma-sourcemap-loader": "^0.3.7",
+    "karma-webpack": "^1.7.0",
     "webpack": "*",
-    "webpack-dev-server": "*",
-
-    "mocha":           ">= 2.4",
-    "mocha-phantomjs": "*",
-    "should":          "*"
+    "webpack-dev-server": "*"
   }
 }
