@@ -5,9 +5,9 @@
 // More convenient dom timer syntax. Uses a regular timer.
 function ZIntervalTimer(interval, callback) {
   const timer = window.setInterval(callback, interval);
-  stop = function() {
-    window.clearInterval(timer)
-  };
+  return {
+    stop: function() { window.clearInterval(timer); }
+  }
 }
 
 export function IntervalTimer(...args) {
