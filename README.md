@@ -44,6 +44,8 @@ There are some limitations:
 - Client side only
 - IE9 and later (no support for legacy browsers)
 
+TODO: needs babel-polyfill on some browsers (looking at you, IE)
+
 #### Development
 
 `npm update` installs dependencies.
