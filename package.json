@@ -23,7 +23,8 @@
     "prepublish": "npm test && npm run build",
     "build": "babel ./src --out-dir dist",
     "dev": "webpack-dev-server",
-    "test": "karma"
+    "test": "karma start --single-run --browsers PhantomJS",
+    "karma": "karma start"
   },
   "devDependencies": {
     "babel-cli": "*",
