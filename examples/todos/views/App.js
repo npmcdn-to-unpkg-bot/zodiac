@@ -54,10 +54,10 @@ function ClickToEdit({$submit, Editor, View}) {
 }
 
 function ClickToEditTodoName({item}) {
-  const value = follow(() => item().name.get());
+  const value = follow(item.name.get);
 
   function onSubmit() {
-    item().name.set(value.get())
+    item.name.set(value.get())
   }
 
   function Editor({$submit, $blur}) {
@@ -70,8 +70,8 @@ function ClickToEditTodoName({item}) {
   function View({$click}) {
     return span({
       $click,
-      "class": [() => item().checked.get() && "checked"]
-    }, [() => item().label()]);
+      "class": [() => item.checked.get() && "checked"]
+    }, [() => item.label()]);
   }
 
   return ClickToEdit({Editor, View, onSubmit});
@@ -84,8 +84,8 @@ function TodoItem(item) {
   return li(
     input({
       type: "checkbox",
-      checked: [() => item().checked.get()],
-      $click: () => item().checked.toggle
+      checked: [() => item.checked.get()],
+      $click: () => item.checked.toggle
     }),
     ClickToEditTodoName({item}),
     " ",

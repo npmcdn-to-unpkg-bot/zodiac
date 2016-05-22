@@ -11,4 +11,3 @@ const
   view     = View(model),
   instance = mount(document.body, view);
 
-window.instance = instance; // Just to make debugging easier

@@ -10,12 +10,10 @@ import {
 window.z = require("./../src/zodiac");
 
 const state = $(0);
-window.state = state;
 
 const
   ticker = $(0),
   timer = IntervalTimer(50, ticker.inc);
-
 
 state.persistence = z.persist(state, {
   getter: () =>
@@ -30,8 +28,6 @@ z.mount(document.body, dom(
   h1("Dev Playground"),
   p("This is a test.. ", ticker.get),
   p({$click: state.inc}, state.get),
-  [state.get, " ", state.get, " ", ticker.get],
-  button({style: ["font-size: ", 0, "px"]}, "Hello!"),
   loop([p("hello")]),
   p(
     a({href: "#", $click: state.persistence.save}, "Save")
