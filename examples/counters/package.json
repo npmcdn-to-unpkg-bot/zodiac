@@ -5,17 +5,13 @@
   "scripts": {
     "dev": "webpack-dev-server"
   },
-  "dependencies": {
-  },
   "devDependencies": {
     "zodiac": "0.1.15",
     "babel-cli": "*",
     "babel-core": "*",
     "babel-loader": "*",
     "babel-preset-es2016": "*",
-    "babel-preset-stage-0": "*",
     "babel-plugin-transform-object-rest-spread": "*",
-    "babel-polyfill": "*",
     "webpack": "*",
     "webpack-dev-server": "*"
   }
