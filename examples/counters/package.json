@@ -1,0 +1,22 @@
+{
+  "name":        "todolist",
+  "version":     "0.1.0",
+  "description": "Zodiac example app",
+  "scripts": {
+    "dev": "webpack-dev-server"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "zodiac": "0.1.14",
+    "babel-cli": "*",
+    "babel-core": "*",
+    "babel-loader": "*",
+    "babel-preset-es2016": "*",
+    "babel-preset-stage-0": "*",
+    "babel-plugin-transform-object-rest-spread": "*",
+    "babel-polyfill": "*",
+    "webpack": "*",
+    "webpack-dev-server": "*"
+  }
+}
