@@ -131,22 +131,31 @@ class TextNodeInstance extends NodeInstance {
   }
 }
 
-// List
-
 function _is(obj, kind) {
   let toString = Object.prototype.toString;
   return toString.call(obj) === ["[object ", kind, "]"].join("");
 }
 
 function tagify(obj) {
-  if (typeof(obj) == "string")    return text(obj);
-  if (typeof(obj) == "number")    return text(obj);
-  if (_is(obj, "Array")) {
-    if (obj.length != 1) throw("Wrong array length in template.");
-    return text(obj[0]);
+  switch (typeof obj) {
+    case "string":
+    case "number":
+    case "function":
+      return text(obj);
+    default:
   }
+
+  // Experimental: Array syntax
+  if (_is(obj, "Array"))
+    return list(...obj.map(item => tagify(item)));
+
   else return obj;
 }
+
+// List
+// This is exported as dom(...) in the official api.
+// It is called List here, because DomNode would be
+// wrong and confusing in this context.
 
 class ListNode {
 
@@ -196,20 +205,43 @@ function tag(name, ...children) {
   return new TagNode(name, children);
 }
 
+function checkAttr(k, v) {
+  if (k[0] == "$" || k[0] == "_") {
+    if (typeof(v) == "function") return "event"
+    else {
+      console.log(v);
+      throw("Template event listener not a function: " + k)
+    }
+  }
+  if (typeof v == "function") return "reactive";
+  if (_is(v, "Array")) return "reactive";
+  return "static";
+}
+
+function reactiveAttrGetter(v) {
+  if (typeof(v) == "function") return v;
+  if (_is(v, "Array")) return () =>
+    v.map((item) =>
+      (typeof(item) == "function") ? item() : item
+    ).join("");
+  return v;
+}
+
 class TagNodeInstance extends NodeInstance {
 
   subConstructor() {
     this.dom = document.createElement(this.nodeDefinition.name);
     this.html = this.nodeDefinition.html.render(this);
 
-    this._eachDefinitionAttr((k, v) => {
-      if (!_is(v, "Array") && (k[0] == "$" || k[0] == "_")){
-        if (typeof(v) != "function")
-          throw("Template event listener not a function.");
-        this.dom.addEventListener(k.slice(1), (e) => v(e), k[0] == "$");
+    this._eachDefinitionAttr((k, v, kind) => {
+      switch (kind) {
+        case "event":
+          this.dom.addEventListener(
+            k.slice(1), (e) => v(e), k[0] == "$");
+          break;
+        case "static":
+          this._setAttr(k, v);
       }
-      else
-        this._setAttr(k, v);
     });
   }
 
@@ -221,8 +253,10 @@ class TagNodeInstance extends NodeInstance {
   }
 
   _eachDefinitionAttr(fn) {
-    Object.keys(this.nodeDefinition.attrs).forEach((k) =>
-      fn(k, this.nodeDefinition.attrs[k]));
+    Object.keys(this.nodeDefinition.attrs).forEach((k) => {
+      const v = this.nodeDefinition.attrs[k];
+      fn(k, v, checkAttr(k, v));
+    });
   }
 
   _sendEvent(name) {
@@ -233,16 +267,13 @@ class TagNodeInstance extends NodeInstance {
 
   _activate() {
     this.computations = [];
-    this._eachDefinitionAttr((k, v) => {
-      if (_is(v, "Array"))
-        this.computations.push(tracker.autorun(() => {
-          let str = v.length > 1
-            ? v.map(function (s) {
-                return typeof(s) == "function" ? s() : s
-              }).join("")
-            : typeof(v[0]) == "function" ? v[0]() : v[0];
-          this._setAttr(k, str);
-        }));
+    this._eachDefinitionAttr((k, v, kind) => {
+      if (kind === "reactive") {
+        const getter = reactiveAttrGetter(v);
+        this.computations.push(
+          tracker.autorun(() =>
+            this._setAttr(k, getter())));
+      }
     });
 
     this.html.activate();
