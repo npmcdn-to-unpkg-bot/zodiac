@@ -115,7 +115,7 @@ function ZVariable(value) {
 function ZDict(_vals) {
   const
     deps = {},
-    vals = Object.assign({}, vals);
+    vals = {..._vals};
 
   function set(name, val) {
     if (vals[name] === val) return;
