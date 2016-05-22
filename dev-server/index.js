@@ -17,24 +17,6 @@ const
   timer = IntervalTimer(50, ticker.inc);
 
 
-const todos = $([
-  {
-    text: $("Buy Milk"),
-    completed: $(false)
-  }
-]);
-
-function createTodo(text) {
-  return {
-    text: $(text),
-    completed: $(false)
-  };
-}
-
-function addTodo(text) {
-  todos.push(createTodo(text));
-}
-
 state.persistence = z.persist(state, {
   getter: () =>
     JSON.parse(localStorage.getItem("state") || 0),
@@ -45,23 +27,13 @@ state.persistence = z.persist(state, {
 });
 
 z.mount(document.body, dom(
-  h1("Hello"),
-  p("This is a test.. ", [ticker.get]),
-  p({$click: state.inc}, [state.get]),
+  h1("Dev Playground"),
+  p("This is a test.. ", ticker.get),
+  p({$click: state.inc}, state.get),
+  [state.get, " ", state.get, " ", ticker.get],
+  button({style: ["font-size: ", 0, "px"]}, "Hello!"),
+  loop([p("hello")]),
   p(
     a({href: "#", $click: state.persistence.save}, "Save")
-  ),
-  loop(todos.get, (todo) =>
-    p([() => todo().text.get()])
-  ),
-  button({
-    $click: () => addTodo("test"),
-    type: "button"
-  },
-    "Add todo"),
-  button({
-    $click: todos.pop,
-    type: "button"
-  },
-    "Remove todo")
+  )
 ));
