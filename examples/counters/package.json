@@ -8,7 +8,7 @@
   "dependencies": {
   },
   "devDependencies": {
-    "zodiac": "0.1.14",
+    "zodiac": "0.1.15",
     "babel-cli": "*",
     "babel-core": "*",
     "babel-loader": "*",

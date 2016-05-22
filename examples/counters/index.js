@@ -21,7 +21,7 @@ function Counter({name, $remove}) {
 
   return div({class: "margin"},
     BasicButton({
-      text: [() => name + ": " + value.get()],
+      text: [name, ": ", value.get],
       $click: value.inc
     }),
     BasicButton({
@@ -32,16 +32,16 @@ function Counter({name, $remove}) {
 
 // Counts the number of counters!
 function CounterCounter({counters}) {
-  return p("Number of counters: ", [counters.length]);
+  return p("Number of counters: ", counters.length);
 }
 
 function AddCounterButton({counters}) {
   function $click() {
-    const counter = Counter({
+    const newCounter = Counter({
       name: window.prompt("Name:"),
-      $remove: () => counters.drop(counter)
+      $remove: () => counters.drop(newCounter)
     });
-    counters.push(counter);
+    counters.push(newCounter);
   }
 
   return BasicButton({
