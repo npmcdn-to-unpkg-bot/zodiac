@@ -24,6 +24,7 @@
     "build": "babel ./src --out-dir dist && webpack --config webpack/build.js",
     "dev": "webpack-dev-server --config webpack/dev-server.js",
     "test": "karma start --single-run",
+    "travis": "karma start --single-run --browsers PhantomJS,Firefox",
     "karma": "karma start"
   },
   "devDependencies": {
