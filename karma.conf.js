@@ -15,7 +15,7 @@ module.exports = function(config) {
 
     frameworks: ['jasmine'],
     reporters:  ['spec'],
-    browsers:   [],
+    browsers:   ['PhantomJS'],
 
     files: [
       'node_modules/babel-polyfill/dist/polyfill.js',
@@ -29,11 +29,6 @@ module.exports = function(config) {
       'src/**/*.js': ['webpack', 'sourcemap']
     },
 
-    webpack: {
-      module: {
-        loaders: require("./webpack.loaders.js"),
-      },
-      devtool: 'inline-source-map'
-    }
+    webpack: require("./webpack/karma.js")
   });
 }
