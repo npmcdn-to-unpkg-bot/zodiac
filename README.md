@@ -30,29 +30,34 @@ Very simple. What about more advanced stuff? Just check out these examples:
 
 - [Examples on Github](examples)
 
-If you want to run these examples and try things out, just clone this repo and run `npm run dev`.
+If you want to run these and try things out, just clone this repo and `npm run dev`.
 
 ## Concepts
 
-### Reactivity in Zodiac
+### Reactivity
 
 Zodiac uses Meteor Tracker for its reactivity model. We alter the API a little bit, but the functionality is the same. Therefore, you should read the [Tracker documentation](https://github.com/meteor/docs/blob/version-NEXT/long-form/tracker-manual.md) to understand how reactivity works in Zodiac.
 
 ### Reactive variables
 
-In Zodiac, `$` is just a shortcut to `new Tracker.Dependency`.
+In Zodiac, `$` is just a shortcut to create a new reactive variable, similar to `ReactiveVar` in Meteor.
 
-TODO: Write something about state trees with reactive joints asnd values.
+TODO:
+
+- Explain reactive variable API
+- Write something about state trees with reactive joints and values.
 
 ### Reactive templates
 
-All of the HTML views in a Zodiav app are described using plain nested javascript functions. These calls produce a template definition that can be rendered reactively and stay live as data changes.
+All of the HTML views in a Zodiac app are described using plain javascript.
 
-One of the biggest benefits of this, is that it becomes very easy to extract partial template logic into functions representing generic components. These functions can even take other template definitions or functions as parameters, so it becomes very easy to create higher-order components. And they are actually not that hard to understand, once you see them.
+TODO: examples and API
 
 ### Standard architecture
 
-I have written some examples to demonstate a suggested standard architecture for larger zodiac apps. This architecture provides clear guidelines on where to store different kinds of code, and provides a very clear separation between central state, state operations, and components. In this respect it is inspired by Redux and Elm. Zodiac is however more pragmatic than these libraries, and will let you do more with less code, and do more in general. You have to be disciplined in order to use this.
+There is a suggested standard architecture for larger zodiac apps, which you can see in some of the examples.
+
+This architecture provides clear separation between central state, interaction with state, and view components. In this respect it is inspired by Redux and Elm, event though Zodiac is more pragmatic, and will let you do more with less code, and do more in general, including shooting yourself in the foot.
 
 ### Reactive router
 
@@ -60,9 +65,9 @@ TODO
 
 ### What about jQuery or other libs?
 
-Zodiac will hopefully replace the need for libraries like jQuery for a lot of use cases, but you can still use it if you want. Just keep track of `$`, and Zodiac should work fine with most libraries.
+Zodiac will hopefully replace the need for libraries like jQuery for most applications, but you can still use it if you want. Just keep track of `$`, and Zodiac should work fine with most libraries.
 
-# Benefits over React
+### Benefits over React
 
 - Faster renderer(? -- should be close to optimal, but not tested yet!)
 - About 20k minified (without babel polyfill for older browsers)
@@ -73,18 +78,19 @@ Zodiac will hopefully replace the need for libraries like jQuery for a lot of us
 - Easier to learn
 - Etc, etc..
 
-But React is more mature and has a lot of conveniences, sure.
+But React is more mature and has a lot of conveniences, whatever.
 
 ### So, how does Zodiac work?
 
-First of all, there is no DOM-diffing. Instead, the render call generates a template instantiation tree, which directly hooks reactive changes into DOM operations on their corresponding nodes, while at the same time keeping track of the correct DOM flow position of each node.
+First of all, there is no DOM-diffing. Instead, the render call generates a template instantiation tree, which directly hooks reactive changes into DOM operations on their corresponding nodes, while at the same time keeping track of the correct DOM flow position of each node. The core implementation is only about 600 lines of JavaScript, so feel free to read it. `:)`
  
 ### Browser support
 
-TODO!
-Also, Zodiac needs babel-polyfill on some browsers (looking at you, IE). See examples.
+TODO! Also, Zodiac needs babel-polyfill on some browsers (looking at you, IE). See examples.
 
-#### Development
+### Development
+
+Zodiac is very alpha for now, so a lot happens in master. The tests will define the API as it matures towards v1.
 
 `npm update` installs dependencies.
 
