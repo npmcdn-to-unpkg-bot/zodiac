@@ -1,16 +1,17 @@
 
-
-const tracker    = require("./tracker");
-const variables  = require("./variables");
-const templates  = require("./templates");
-const utils      = require("./utils");
+const
+  tracker       = require("./tracker"),
+  templates     = require("./templates"),
+  variables     = require("./variables"),
+  serialization = require("./serialization"),
+  utils         = require("./utils");
 
 const Zodiac = {
-  ...variables,
-  ...utils,
+  ...tracker,
   ...templates,
-  autorun: tracker.autorun,
-  nonreactive: tracker.nonreactive
+  ...variables,
+  ...serialization,
+  ...utils,
 };
 
 module.exports = Zodiac;

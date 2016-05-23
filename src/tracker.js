@@ -27,7 +27,7 @@
  * @namespace Tracker
  * @summary The namespace for Tracker-related methods.
  */
-const Tracker = module.exports = {};
+const Tracker = {};
 
 // http://docs.meteor.com/#tracker_active
 
@@ -638,3 +638,14 @@ Tracker.afterFlush = function (f) {
   afterFlushCallbacks.push(f);
   requireFlush();
 };
+
+module.exports = {
+  autorun:      Tracker.autorun,
+  nonreactive:  Tracker.nonreactive,
+  flush:        Tracker.flush,
+  onInvalidate: Tracker.onInvalidate,
+  Dep: function () {
+    return new Tracker.Dependency();
+  }
+}
+

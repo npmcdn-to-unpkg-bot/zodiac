@@ -1,5 +1,5 @@
 
-const tracker = require("./tracker");
+const {Dep, autorun} = require("./tracker");
 
 // variables.js
 //
@@ -11,12 +11,21 @@ const tracker = require("./tracker");
 // avoid template boilerplate.
 
 
+function shortcut(kind) {
+  return function(...args) {
+    return new kind(...args);
+  }
+}
+
+export const
+  $    = shortcut(ZVar),
+  Dict = shortcut(ZDict);
 
 // Return a reactive variable, which tracks changes using tracker,
 // so that it functions as a reactive source.
-function ZVariable(value) {
+function ZVar(value) {
   const 
-    dep = new tracker.Dependency(),
+    dep = Dep(),
     defaultValue = value;
 
   // Return the current value of the variable
@@ -119,13 +128,13 @@ function ZDict(_vals) {
 
   function set(name, val) {
     if (vals[name] === val) return;
-    deps[name] = deps[name] || new tracker.Dependency();
+    deps[name] = deps[name] || Dep();
     deps[name].changed();
     vals[name] = val;
   }
 
   function get(name) {
-    deps[name] = deps[name] || new tracker.Dependency();
+    deps[name] = deps[name] || Dep();
     deps[name].depend();
     return vals[name];
   }
@@ -134,41 +143,9 @@ function ZDict(_vals) {
   });
 }
 
-// Returns a reactive variable that will change to the value of a reactive getter whenever it changes. It can however be set to other values inbetween, without affecting the source of the getter.
-export function follow(getter) {
-  const result = new ZVariable(undefined);
-  tracker.autorun(() => result.set(getter()));
+// Returns a reactive variable that will change to the value of a reactive getter whenever the getter changes. It can however be set to other values inbetween, without affecting the source of the getter.
+export function Follow(getter) {
+  const result = $(1);
+  autorun(() => result.set(getter()));
   return result;
 }
-
-// Provides saving, reloading and save state tracking of a reactive variable given a getter and a setter to persist and load the state.
-export function persist(state, {getter, setter}) {
-  let saved = $(false);
-  state.set(getter());
-
-  tracker.autorun(() => {
-    state.depend();
-    saved.set(false);
-  });
-
-  saved.set(true);
-
-  return {
-    save: () => {
-      setter(state);
-      saved.set(true);
-    },
-    reload: () => state.set(getter()),
-    saved
-  };
-}
-
-function shortcut(kind) {
-  return function(...args) {
-    return new kind(...args);
-  }
-}
-
-export const
-  $    = shortcut(ZVariable),
-  Dict = shortcut(ZDict);
