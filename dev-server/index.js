@@ -1,6 +1,6 @@
 
 import {
-  $, IntervalTimer,
+  $, IntervalTimer, Persist, localStorage, Serialize,
   mount,
   cond, loop, dynamic, component, tag, text, dom,
   div, strong, ul, li, input, button, hr, span,
@@ -15,14 +15,10 @@ const
   ticker = $(0),
   timer = IntervalTimer(50, ticker.inc);
 
-state.persistence = z.persist(state, {
-  getter: () =>
-    JSON.parse(localStorage.getItem("state") || 0),
-
-  setter: (state) =>
-    localStorage.setItem("state",
-      JSON.stringify(state.get()))
-});
+  state.persistence =
+    Persist(
+      SerializeTo(
+        localStorage("state")));
 
 z.mount(document.body, dom(
   h1("Dev Playground"),

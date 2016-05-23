@@ -19,7 +19,7 @@ module.exports = function(config) {
 
     files: [
       'node_modules/babel-polyfill/dist/polyfill.js',
-      'test/**/*.coffee'
+      'test/_index.coffee'
     ],
 
     exclude: [
@@ -27,7 +27,7 @@ module.exports = function(config) {
     ],
 
     preprocessors: {
-      'test/**/*.coffee': ['webpack', 'sourcemap'],
+      'test/_index.coffee': ['webpack', 'sourcemap'],
       'src/**/*.js': ['webpack', 'sourcemap']
     },
 
