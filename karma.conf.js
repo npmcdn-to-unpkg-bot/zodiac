@@ -22,7 +22,9 @@ module.exports = function(config) {
       'test/**/*.coffee'
     ],
 
-    exclude: [],
+    exclude: [
+      'test/**/_*.js'
+    ],
 
     preprocessors: {
       'test/**/*.coffee': ['webpack', 'sourcemap'],

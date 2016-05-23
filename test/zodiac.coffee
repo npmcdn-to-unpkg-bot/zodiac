@@ -1,26 +1,27 @@
 
-
 Zodiac = require("../src/zodiac")
 
+# TODO: This file just contains stuff that lacks tests or now.
+
 describe "Zodiac", ->
-  it "can be imported", ->
-    expect(Zodiac).toBeDefined()
 
-  it "exposes tracker api", ->
-    expect(typeof Zodiac.autorun).toEqual("function")
-    expect(typeof Zodiac.nonreactive).toEqual("function")
+  describe "public api", ->
 
-  it "exposes variable api", ->
-    expect(typeof Zodiac.$).toEqual("function")
+    beforeEach ->
+      jasmine.addMatchers require("./_customMatchers")
 
-  it "exposes template api", ->
-    expect(typeof Zodiac.dom).toEqual("function")
-    expect(typeof Zodiac.mount).toEqual("function")
-    expect(typeof Zodiac.p).toEqual("function")
-    expect(typeof Zodiac.a).toEqual("function")
-    expect(typeof Zodiac.h1).toEqual("function")
-    expect(typeof Zodiac.div).toEqual("function")
+    it "has tracker functions", ->
+      expect(Zodiac).toHaveFunctions(
+        'Dep autorun nonreactive flush onInvalidate')
 
-  it "exposes utility api", ->
-    expect(typeof Zodiac.IntervalTimer).toEqual("function")
+    it "has variable functions", ->
+      expect(Zodiac).toHaveFunctions("$ Dict Follow")
+
+    it "has template functions", ->
+      expect(Zodiac).toHaveFunctions(
+        "mount text tag cond loop dynamic component dom " +
+        "p a h1 div abbr pre frameset") # and so on...
+
+    it "has utility functions", ->
+      expect(Zodiac).toHaveFunctions("IntervalTimer")
 
