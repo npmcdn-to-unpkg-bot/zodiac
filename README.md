@@ -57,7 +57,7 @@ TODO: examples and API
 
 There is a suggested standard architecture for larger zodiac apps, which you can see in some of the examples.
 
-This architecture provides clear separation between central state, interaction with state, and view components. In this respect it is inspired by Redux and Elm, event though Zodiac is more pragmatic, and will let you do more with less code, and do more in general, including shooting yourself in the foot.
+This architecture provides clear separation between central state (store), actions & getters (model), and templates (views / components). In this respect it is inspired by Redux and Elm, but it will let you do more with less code, and do more in general, including shooting yourself in the foot.
 
 ### Reactive router
 
@@ -78,7 +78,7 @@ Zodiac will hopefully replace the need for libraries like jQuery for most applic
 - Easier to learn
 - Etc, etc..
 
-But React is more mature and has a lot of conveniences, whatever.
+But React is more mature and has a lot of conveniences, yeah, yeah, whatever.
 
 ### So, how does Zodiac work?
 
