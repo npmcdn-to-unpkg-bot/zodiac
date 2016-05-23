@@ -1,6 +1,10 @@
 
 
 Todo:
+- Travis integration + firefox
+- Modularize template lib so bits can be tested
+- Rework examples to index.js -> App.js
+- Share example logic between playground and template integration tests
 - Integrate reactive router
 - Have reactive router support sub-paths
 
