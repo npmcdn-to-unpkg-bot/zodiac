@@ -5,9 +5,6 @@
 
 ---
 
-[![build status](https://img.shields.io/travis/jbe/zodiac/master.svg?style=flat-square)](https://travis-ci.org/jbe/zodiac)
-[![npm version](https://img.shields.io/npm/v/zodiac.svg?style=flat-square)](https://www.npmjs.com/package/zodiac)
-
 
 Zodiac is a reactive rendering library. It solves some of the same problems as tools like React, Elm, CycleJS, Riot, Polymer, Angular, Ember etc. It is very modular and minimal, while still being powerful, efficient and fun to use.
 
@@ -35,6 +32,9 @@ Very simple. What about more advanced stuff? Just check out these examples:
 - [Examples on Github](examples)
 
 If you want to run these and try things out, just clone this repo and `npm run dev`.
+
+[![build status](https://img.shields.io/travis/jbe/zodiac/master.svg?style=flat-square)](https://travis-ci.org/jbe/zodiac)
+[![npm version](https://img.shields.io/npm/v/zodiac.svg?style=flat-square)](https://www.npmjs.com/package/zodiac)
 
 ## Concepts
 
