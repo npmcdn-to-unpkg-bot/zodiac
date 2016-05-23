@@ -9,18 +9,22 @@ Zodiac is a reactive rendering library. It solves some of the same problems as t
 
 Let's see it in action:
 
-    import { $, mount, dom, h1, p } from "zodiac";
+```javascript
 
-    const counter = $(0);
+import { $, mount, dom, h1, p } from "zodiac";
 
-    mount(document.body, dom(
-      h1(
-        { $click: counter.inc },
-        "Value of counter: ",
-        counter.get
-      ),
-      p("Click the counter to count")
-    ));
+const counter = $(0);
+
+mount(document.body, dom(
+  h1(
+    { $click: counter.inc },
+    "Value of counter: ",
+    counter.get
+  ),
+  p("Click the counter to count")
+));
+
+```
 
 Very simple. What about more advanced stuff? Just check out these examples:
 
