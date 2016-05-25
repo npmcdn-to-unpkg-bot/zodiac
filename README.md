@@ -82,11 +82,13 @@ Zodiac will hopefully replace the need for libraries like jQuery for most applic
 - Easier to learn
 - Etc, etc..
 
-But React is more mature and has a lot of conveniences, yeah, yeah, whatever.
+Zodiac is still very alpha though, and has not been production tested.
 
 ### So, how does Zodiac work?
 
 First of all, there is no DOM-diffing. Instead, the render call generates a template instantiation tree, which directly hooks reactive changes into DOM operations on their corresponding nodes, while at the same time keeping track of the correct DOM flow position of each node. The core implementation is only about 600 lines of JavaScript, so feel free to read it. `:)`
+
+Basically there are two different tree structures at work; the template definition tree, and one or more template instantiation trees. The definition tree defines the appearance and behaviour of a template, while the instantiation tree maintains the current state of a definition tree being rendered. Each instantiation node has a corresponding definition node in the definition tree. Instantiation trees can have different structure than their definition trees due to reactive loops and conditionals.
  
 ### Browser support
 
