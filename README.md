@@ -12,18 +12,44 @@ Let's see it in action:
 
 ```javascript
 
-import { $, mount, dom, h1, p } from "zodiac";
+import {
+  $, mount, loop,
+  dom, h1, p, button, div,
+} = from "zodiac";
 
-const counter = $(0);
+function Button({text, $click}) {
+  return button(
+    { $click, type: "button" },
+    text
+  );
+}
 
-mount(document.body, dom(
-  h1(
-    { $click: counter.inc },
-    "Value of counter: ",
-    counter.get
-  ),
-  p("Click the counter to count")
-));
+function Counter(counters, counter) {
+  return div({style: "margin: 1em"},
+    Button({ 
+      $click: counter.inc,
+      text: counter.get
+    }),
+    Button({ 
+      $click: () => counters.drop(counter),
+      text: "Delete"
+    })
+  );
+}
+
+function App() {
+  const counters = $([]);
+  return dom(
+    h1(counters.length, " counters"),
+    loop(counters.get, (v) => Counter(counters, v)),
+    Button({
+      text: "More Counters!!!",
+      $click: () => counters.push($(0))
+    })
+  );
+}
+
+mount(document.body, App());
 
 ```
 
