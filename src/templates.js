@@ -342,40 +342,51 @@ class CondNodeInstance extends NodeInstance {
   }
 }
 
-// Loop
+function _castArray() {
+  if (!arguments.length) return [];
+  var value = arguments[0];
+  return _is(value, "Array") ? value : [value];
+}
 
-class LoopNode {
+// Dynamic
 
-  constructor(listSource, body) {
+class DynamicNode {
+
+  constructor(listSource, remapFunc) {
     this.isReactive = typeof(listSource) == "function";
     this.listSource = listSource;
-    this.body = body || (v => v);
-    if (typeof(this.body) != "function")
-      throw new Error("loop body must be a function");
+    this.remapFunc = remapFunc || (v => v);
+    if (typeof(this.remapFunc) != "function")
+      throw new Error("second argument for dynamic must be a function if present");
   }
 
   render(parentNodeInstance) {
-    return new LoopNodeInstance(this, parentNodeInstance);
+    return new DynamicNodeInstance(this, parentNodeInstance);
   }
-}
 
-function loop(listSource, body) {
-  return new LoopNode(listSource, body);
-}
+  _source() {
+    const ls = this.listSource;
+    return _castArray(typeof(ls) == "function" ? ls() : ls);
+  }
 
-class LoopNodeInstance extends NodeInstance {
-
-  _mapBodyInstances(ndf) {
+  _mapBody(instance) {
     let i = 0;
-    let source = ndf.isReactive ? ndf.listSource() : ndf.listSource;
-    this.bodyInstances = source.map((m) => {
-      return tagify(ndf.body(m, i++)).render(this);
-    });
+    return this._source().map((m) =>
+      tagify(this.remapFunc(m, i++)).render(instance)
+    );
   }
+}
+
+function dynamic(listSource, remapFunc) {
+  return new DynamicNode(listSource, remapFunc);
+}
+
+class DynamicNodeInstance extends NodeInstance {
 
   subConstructor() {
     let ndf = this.nodeDefinition;
-    if (!ndf.isReactive) this._mapBodyInstances(ndf);
+    if (!ndf.isReactive)
+      this.bodyInstances = ndf._mapBody(this);
   }
 
   _activate() {
@@ -385,7 +396,7 @@ class LoopNodeInstance extends NodeInstance {
       this.computation = tracker.autorun(() => {
         if (this.active)
           for (var c of this.bodyInstances) c.deactivate();
-        this._mapBodyInstances(ndf);
+        this.bodyInstances = ndf._mapBody(this);
         for (var c of this.bodyInstances) c.activate();
       });
     }
@@ -403,69 +414,6 @@ class LoopNodeInstance extends NodeInstance {
   }
 }
 
-// Dynamic (switch-like)
-
-class DynamicNode {
-
-  constructor(condition, branches) {
-    this.condition = condition;
-    this.branches = branches;
-    this.isReactive = typeof(condition) == "function";
-  }
-
-  render(parentNodeInstance) {
-    return new DynamicNodeInstance(this, parentNodeInstance);
-  }
-}
-
-function dynamic(condition, branches) {
-  return new DynamicNode(condition, branches);
-}
-
-class DynamicNodeInstance extends NodeInstance {
-
-  subConstructor() {
-    this.branches = {};
-    this.children = [];
-    let ndf = this.nodeDefinition;
-    Object.keys(ndf.branches).forEach((k) => {
-      this.branches[k] = ndf.branches[k].render(this);
-      this.children.push(this.branches[k]);
-    });
-    if (!ndf.isReactive)
-      this.state = ndf.condition;
-  }
-
-  _activateState() {
-    if (!this.branches[this.state]) {
-      console.log(this);
-      throw("Unknown dynamic switch state.");
-    }
-    this.branches[this.state].activate();
-  }
-
-  _activate() {
-    let ndf = this.nodeDefinition;
-    if (ndf.isReactive) {
-      this.computation = tracker.autorun(() => {
-        let newState = ndf.condition();
-        if (newState == this.state) return;
-        this.state = newState;
-        this._activateState();
-      });
-    }
-    else 
-      this._activateState();
-  }
-
-  _deactivate() {
-    if (this.isReactive) this.computation.stop();
-    let branch = this.branches[this.state];
-    if (branch) branch.deactivate();
-  }
-
-  descendants() { return this.children; }
-}
 
 // Component (experimental feature)
 
@@ -506,7 +454,7 @@ class ComponentNodeInstance extends NodeInstance {
 }
 
 module.exports = {
-  mount, text, tag, cond, loop, dynamic, component,
+  mount, text, tag, cond, dynamic, component,
   dom: list
 };
 
