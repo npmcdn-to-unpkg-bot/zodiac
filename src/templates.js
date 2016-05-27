@@ -92,14 +92,11 @@ function mount(dom, root) {
 
 // Text
 
-class TextNode {
+function TextNode(str) {
+  this.str = str;
+  this.isReactive = typeof(str) == "function";
 
-  constructor(str) {
-    this.str = str;
-    this.isReactive = typeof(str) == "function";
-  }
-
-  render(parentNodeInstance) {
+  this.render = function (parentNodeInstance) {
     return new TextNodeInstance(this, parentNodeInstance);
   }
 }
@@ -157,13 +154,10 @@ function tagify(obj) {
 // It is called List here, because DomNode would be
 // wrong and confusing in this context.
 
-class ListNode {
+function ListNode(children) {
+  this.children = children.map(m => tagify(m));
 
-  constructor(children) {
-    this.children = children.map(m => tagify(m));
-  }
-
-  render(parentNodeInstance) {
+  this.render = function (parentNodeInstance) {
     return new ListNodeInstance(this, parentNodeInstance);
   }
 }
@@ -186,17 +180,14 @@ class ListNodeInstance extends NodeInstance {
   descendants() { return this.children; }
 }
 
-class TagNode {
+function TagNode(name, children) {
+  this.name = name;
+  this.attrs = children[0] && children[0].constructor == Object
+    ? children.shift()
+    : {};
+  this.html = list(...children);
 
-  constructor(name, children) {
-    this.name = name;
-    this.attrs = children[0] && children[0].constructor == Object
-      ? children.shift()
-      : {};
-    this.html = list(...children);
-  }
-
-  render(parentNodeInstance) {
+  this.render = function (parentNodeInstance) {
     return new TagNodeInstance(this, parentNodeInstance);
   }
 }
@@ -292,15 +283,12 @@ class TagNodeInstance extends NodeInstance {
 
 // Cond
 
-class CondNode {
+function CondNode(check, a, b) {
+  this.check = check;
+  this.a = tagify(a);
+  if (b) this.b = tagify(b);
 
-  constructor(check, a, b) {
-    this.check = check;
-    this.a = tagify(a);
-    if (b) this.b = tagify(b);
-  }
-
-  render(parentNodeInstance) {
+  this.render = function(parentNodeInstance) {
     return new CondNodeInstance(this, parentNodeInstance);
   }
 }
@@ -348,30 +336,27 @@ function _castArray() {
   return _is(value, "Array") ? value : [value];
 }
 
-// Dynamic
+// Dynamic (aka loop)
 
-class DynamicNode {
+function DynamicNode(listSource, remapFunc) {
+  this.isReactive = typeof(listSource) == "function";
+  this.listSource = listSource;
+  this.remapFunc = remapFunc || (v => v);
+  if (typeof(this.remapFunc) != "function")
+    throw new Error("second argument for dynamic must be a function if present");
 
-  constructor(listSource, remapFunc) {
-    this.isReactive = typeof(listSource) == "function";
-    this.listSource = listSource;
-    this.remapFunc = remapFunc || (v => v);
-    if (typeof(this.remapFunc) != "function")
-      throw new Error("second argument for dynamic must be a function if present");
-  }
-
-  render(parentNodeInstance) {
+  this.render = function (parentNodeInstance) {
     return new DynamicNodeInstance(this, parentNodeInstance);
   }
 
-  _source() {
+  const _source = () => {
     const ls = this.listSource;
     return _castArray(typeof(ls) == "function" ? ls() : ls);
   }
 
-  _mapBody(instance) {
+  this._mapBody = function (instance) {
     let i = 0;
-    return this._source().map((m) =>
+    return _source().map((m) =>
       tagify(this.remapFunc(m, i++)).render(instance)
     );
   }
