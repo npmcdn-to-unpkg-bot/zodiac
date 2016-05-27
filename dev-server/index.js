@@ -20,29 +20,13 @@ const
   //     SerializeTo(
   //       localStorage("state")));
 
-
-function* entries(obj) {
-  for (var prop in obj) yield [prop, obj[prop]];
-}
-
-function* map(iterable, fn) {
-  var i = 0;
-  for (let item of iterable)
-    yield fn(item, i++);
-}
-
 function Tabs(tabs) {
   const selection = $("MultipleCounters");
-  const branches = {};
-
-  for (let key in tabs) {
-    branches[key] = tabs[key]();
-  }
 
   return div(
     ul({class: "nav nav-tabs"},
-      ...Array.from(map(entries(tabs), ([k, v]) =>
-        li({class: "nav-item"}, 
+      ...(Object.keys(tabs).map((k) =>
+        li({class: "nav-item"},
             a({
               class: "nav-link",
               $click: () => selection.set(k)
@@ -50,19 +34,17 @@ function Tabs(tabs) {
         )
       ))
     ),
-
-    // dynamic(selection.get, branches)
-    dynamic(selection.get, {MultipleCounters: dom("test"), ArchitectureTodos: dom("yoyo")})
+    dynamic(() => tabs[selection.get()])
   );
 }
 
 import MultipleCounters from "../examples/MultipleCounters.js";
-import ArchitectureTodos from "../examples/ArchitectureTodos/index.js";
+import HelloWorld from "../examples/HelloWorld.js";
 
 function ExampleTabs() {
   return Tabs({
     MultipleCounters,
-    ArchitectureTodos
+    HelloWorld
   });
 }
 

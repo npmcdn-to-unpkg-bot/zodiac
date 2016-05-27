@@ -2,8 +2,7 @@
 
 Todo:
 
-- Fix dynamic nodes
-- Share example logic between playground and template integration tests
+- Extract lib funcs like _is and _castArray
 - Modularize template lib so bits can be tested
 - Template unit tests
 - Integrate reactive router
