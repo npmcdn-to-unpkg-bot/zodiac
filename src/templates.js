@@ -399,47 +399,8 @@ class DynamicNodeInstance extends NodeInstance {
   }
 }
 
-
-// Component (experimental feature)
-
-class ComponentNode {
-
-  constructor(props = {}) {
-    this.onShow = props.onShow;
-    this.onHide = props.onHide;
-    this.template = tagify(props.template);
-  }
-
-  render(parentNodeInstance) {
-    return new ComponentNodeInstance(this, parentNodeInstance);
-  }
-}
-
-function component(props) {
-  return new ComponentNode(props);
-}
-
-class ComponentNodeInstance extends NodeInstance {
-
-  subConstructor() {
-    this.template = this.nodeDefinition.template.render(this);
-  }
-
-  _activate() {
-    this.template.activate();
-    if (this.nodeDefinition.onShow) this.nodeDefinition.onShow(this);
-  }
-
-  _deactivate() {
-    if (this.nodeDefinition.onHide) this.nodeDefinition.onHide(this);
-    this.template.deactivate();
-  }
-
-  descendants() { return [this.template]; }
-}
-
 module.exports = {
-  mount, text, tag, cond, dynamic, component,
+  mount, text, tag, cond, dynamic,
   dom: list
 };
 
