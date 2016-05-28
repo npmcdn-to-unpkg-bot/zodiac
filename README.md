@@ -5,7 +5,6 @@
 
 ---
 
-
 Zodiac is a reactive rendering library. It solves some of the same problems as tools like React, Elm, CycleJS, Riot, Polymer, Angular, Ember etc. It is very modular and minimal, while still being powerful, efficient and fun to use.
 
 [Examples on Github](examples)
@@ -58,24 +57,22 @@ Zodiac will hopefully replace the need for libraries like jQuery for most applic
 - Components don't have to be wrapped in a tag
 - Iterators don't need keys
 - No DOM noise. No id's, classes or superfluous tags added unless you add them yourself.
-- Easier to learn
-- Etc, etc..
 
-Zodiac is still very alpha though, and has not been production tested.
+### How does it work?
 
-### So, how does Zodiac work?
-
-First of all, there is no DOM-diffing. Instead, the render call generates a template instantiation tree, which directly hooks reactive changes into DOM operations on their corresponding nodes, while at the same time keeping track of the correct DOM flow position of each node. The core implementation is only about 600 lines of JavaScript, so feel free to read it. `:)`
+First of all, there is no DOM-diffing. Instead, the render call generates a template instantiation tree, which directly hooks reactive changes into DOM operations on their corresponding nodes, while at the same time keeping track of the correct DOM flow position of each node. The core implementation is less than 500 lines of JavaScript, so feel free to read it. `:)`
 
 Basically there are two different tree structures at work; the template definition tree, and one or more template instantiation trees. The definition tree defines the appearance and behaviour of a template, while the instantiation tree maintains the current state of a definition tree being rendered. Each instantiation node has a corresponding definition node in the definition tree. Instantiation trees can have different structure than their definition trees due to reactive loops and conditionals.
  
 ### Browser support
 
-TODO! Also, Zodiac needs babel-polyfill on some browsers (looking at you, IE). See examples.
+TODO
+
+Zodiac needs babel-polyfill on some browsers (looking at you, IE). See examples.
 
 ### Development
 
-Zodiac is very alpha for now, so a lot happens in master. The tests will define the API as it matures towards v1.
+Zodiac is in alpha for now, so a lot happens in master. The tests will define the API as it matures towards v1.
 
 `npm update` installs dependencies.
 
