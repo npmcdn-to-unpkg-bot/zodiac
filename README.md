@@ -8,54 +8,7 @@
 
 Zodiac is a reactive rendering library. It solves some of the same problems as tools like React, Elm, CycleJS, Riot, Polymer, Angular, Ember etc. It is very modular and minimal, while still being powerful, efficient and fun to use.
 
-Let's see it in action:
-
-```javascript
-
-import {
-  $, mount, loop,
-  dom, h1, p, button, div,
-} = from "zodiac";
-
-function Button({text, $click}) {
-  return button(
-    { $click, type: "button" },
-    text
-  );
-}
-
-function Counter(counters, counter) {
-  return div({style: "margin: 1em"},
-    Button({ 
-      $click: counter.inc,
-      text: counter.get
-    }),
-    Button({ 
-      $click: () => counters.drop(counter),
-      text: "Delete"
-    })
-  );
-}
-
-function App() {
-  const counters = $([]);
-  return dom(
-    h1(counters.length, " counters"),
-    loop(counters.get, (v) => Counter(counters, v)),
-    Button({
-      text: "More Counters!!!",
-      $click: () => counters.push($(0))
-    })
-  );
-}
-
-mount(document.body, App());
-
-```
-
-Very simple. What about more advanced stuff? Just check out these examples:
-
-- [Examples on Github](examples)
+[Examples on Github](examples)
 
 If you want to run these and try things out, just clone this repo and `npm run dev`.
 
