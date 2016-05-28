@@ -36,7 +36,7 @@ class NodeInstance {
     this.active = false;
   }
 
-  // Returns the next active dom sibling after the current one. By active dom, i mean dom that is currently included in the document.
+  // Returns the next active dom sibling after the current one. By active dom, i mean dom that is currently mounted somewhere beneath document.body.
   nextDomSibling() {
     let r = this.domParent.domChildAfter(this);
     if (r) return r.dom;
@@ -139,10 +139,8 @@ function tagify(obj) {
     case "number":
     case "function":
       return text(obj);
-    default:
   }
 
-  // Experimental: Array syntax
   if (_is(obj, "Array"))
     return list(...obj.map(item => tagify(item)));
 
@@ -181,15 +179,50 @@ class ListNodeInstance extends NodeInstance {
 }
 
 function TagNode(name, children) {
+  let fc = children[0], cls;
+  if (fc && typeof fc == "string" && fc[0] == ".")
+    cls = children.shift();
+
   this.name = name;
   this.attrs = children[0] && children[0].constructor == Object
     ? children.shift()
     : {};
   this.html = list(...children);
 
+  if (cls) this.attrs[cls] = true;
+
+  this.classes = {};
+
+  Object.keys(this.attrs).forEach(k => {
+    if (k[0] == ".") {
+      k.slice(1).split(".").forEach(c => {
+        this.classes[c] = this.attrs[k];
+      });
+      delete this.attrs[k];
+    }
+  });
+
+  if (this.attrs.class) {
+    this.attrs.class.split(/\s+/).forEach(c =>
+      this.classes[c] = true
+    );
+    delete this.attrs.class;
+  }
+
   this.render = function (parentNodeInstance) {
     return new TagNodeInstance(this, parentNodeInstance);
   }
+
+  this.getClassStr = function () {
+    const result = [];
+    Object.keys(this.classes).forEach(k => {
+      const
+        v = this.classes[k],
+        cond = typeof v == "function" ? v() : v;
+      if (cond) result.push(k);
+    });
+    return result.length ? result.join(" ") : undefined;
+  };
 }
 
 function tag(name, ...children) {
@@ -237,7 +270,9 @@ class TagNodeInstance extends NodeInstance {
   }
 
   _setAttr(k, v) {
-    if(v === false || v === undefined || v === null)
+    if (k === "value")
+      this.dom.value = v;
+    if (v === false || v === undefined || v === null)
       this.dom.removeAttribute(k)
     else
       this.dom.setAttribute(k, v);
@@ -266,6 +301,10 @@ class TagNodeInstance extends NodeInstance {
             this._setAttr(k, getter())));
       }
     });
+
+    this.computations.push(
+      tracker.autorun(() =>
+        this._setAttr("class", this.nodeDefinition.getClassStr())));
 
     this.html.activate();
     this.domParent.dom.insertBefore(this.dom, this.nextDomSibling());
@@ -342,8 +381,10 @@ function DynamicNode(listSource, remapFunc) {
   this.isReactive = typeof(listSource) == "function";
   this.listSource = listSource;
   this.remapFunc = remapFunc || (v => v);
-  if (typeof(this.remapFunc) != "function")
+  if (typeof(this.remapFunc) != "function") {
+    console.log(this.remapFunc);
     throw new Error("second argument for dynamic must be a function if present");
+  }
 
   this.render = function (parentNodeInstance) {
     return new DynamicNodeInstance(this, parentNodeInstance);
