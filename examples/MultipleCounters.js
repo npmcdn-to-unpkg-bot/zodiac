@@ -60,7 +60,7 @@ function MultipleCounters() {
   );
 }
 
-export default MultipleCounters();
+module.exports = MultipleCounters();
 
 // mount(
 //   document.body,

@@ -6,7 +6,7 @@ module.exports = require("./defaults");
 Object.assign(
   module.exports,
   {
-    entry: "./dev-server/index.js",
+    entry: "./dev-server/index.coffee",
 
     output: {
       path: path.resolve(__dirname, buildPath),
