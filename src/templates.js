@@ -358,6 +358,7 @@ class CondNodeInstance extends NodeInstance {
       });
     });
   }
+
   _deactivate() {
     this.computation.stop();
     if (this.a.active) this.a.deactivate();
