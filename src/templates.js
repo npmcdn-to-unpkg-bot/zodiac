@@ -352,8 +352,10 @@ class CondNodeInstance extends NodeInstance {
   _activate() {
     this.computation = tracker.autorun(() => {
       this.state = this.checkState();
-      if (this.state != this.a.active) this.a.toggle();
-      if (this.b && this.state == this.b.active) this.b.toggle();
+      tracker.nonreactive(() => {
+        if (this.state != this.a.active) this.a.toggle();
+        if (this.b && this.state == this.b.active) this.b.toggle();
+      });
     });
   }
   _deactivate() {
