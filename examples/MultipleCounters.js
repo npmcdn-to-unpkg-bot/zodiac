@@ -6,7 +6,7 @@ import {
 } from "../src/zodiac";
 
 
-function BasicButton({text, $click}) {
+function BasicButton(text, $click) {
   return button(
     {
       type: "button",
@@ -16,47 +16,40 @@ function BasicButton({text, $click}) {
   );
 }
 
-function Counter({name, $remove}) {
-  const value = $(0);
-
-  return div({class: "margin"},
-    BasicButton({
-      text: [name, ": ", value.get],
-      $click: value.inc
-    }),
-    BasicButton({
-      text: "Remove",
-      $click: $remove
-    }));
+function margin(...children) {
+  return div(
+    { style: "margin: 1em 0" },
+    ...children
+  );
 }
 
-// Counts the number of counters!
-function CounterCounter({counters}) {
-  return p("Number of counters: ", counters.length);
+function CounterCounter(counters) {
+  return p("Total counters: ", counters.length);
 }
 
-function AddCounterButton({counters}) {
-  function $click() {
-    const newCounter = Counter({
-      name: window.prompt("Name:"),
-      $remove: () => counters.drop(newCounter)
-    });
-    counters.push(newCounter);
-  }
+function CountButton(value, $remove) {
+  return margin(
+    BasicButton(["Count: ", value.get], value.inc),
+    BasicButton("Remove", $remove)
+  );
+}
 
-  return BasicButton({
-    text: "More counters please!",
-    $click
-  })
+function AddCounterButton(counters) {
+  return BasicButton(
+    "More counters please!",
+    () => counters.push($(0))
+  );
 }
 
 function MultipleCounters() {
-  const counters = $([]);
+  const values = $([]);
 
-  return div({ class: "margin" },
-    CounterCounter({counters}),
-    dynamic(counters.get),
-    AddCounterButton({counters})
+  return margin(
+    CounterCounter(values),
+    dynamic(values.get, (value) => dom(
+      CountButton(value, () => values.drop(value))
+    )),
+    AddCounterButton(values)
   );
 }
 

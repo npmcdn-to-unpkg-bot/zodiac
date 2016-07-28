@@ -1,10 +1,4 @@
-
-
-import {
-  dom,
-  h3,
-  p
-} from "../src/zodiac";
+import { dom, h3, p } from "zodiac";
 
 module.exports = dom(
   // the dom function lets you return more than one tag

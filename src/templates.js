@@ -203,9 +203,14 @@ function TagNode(name, children) {
   });
 
   if (this.attrs.class) {
-    this.attrs.class.split(/\s+/).forEach(c =>
-      this.classes[c] = true
-    );
+    if (typeof this.attrs.class === "string") {
+      this.attrs.class.split(/\s+/).forEach(c =>
+        this.classes[c] = true
+      );
+    }
+    if (_is(this.attrs.class, "Array")) {
+      this.attrs.class.forEach(c => this.classes[c] = true)
+    }
     delete this.attrs.class;
   }
 
@@ -261,7 +266,7 @@ class TagNodeInstance extends NodeInstance {
       switch (kind) {
         case "event":
           this.dom.addEventListener(
-            k.slice(1), (e) => v(e), k[0] == "$");
+            k.slice(1), v, k[0] == "$");
           break;
         case "static":
           this._setAttr(k, v);

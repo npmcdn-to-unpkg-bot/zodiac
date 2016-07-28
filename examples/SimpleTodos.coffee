@@ -92,7 +92,7 @@ ItemCount = ->
   -> switch visibleTodos().length
     when 0 then "nothing"
     when 1 then "1 item"
-    else visibleTodos().length + " items"
+    else + " items"
 
 Deletor = ->
   cond (-> visibleTodos().length > 0),
@@ -101,7 +101,11 @@ Deletor = ->
         $click: ->
           visibleTodos().forEach todos.drop
       },
-      "Delete ", visibilityFilter.get, " items"
+      "Delete "
+      visibilityFilter.get
+      " items ("
+      -> visibleTodos().length
+      ")"
 
 VisibilityLink = (name) ->
   span {
@@ -118,7 +122,6 @@ FilterSelector = ->
     VisibilityLink("active"),    " "
     VisibilityLink("completed"), " "
     span ".text-muted",
-      "(", ItemCount(), ") "
       Deletor()
 
 App = ->

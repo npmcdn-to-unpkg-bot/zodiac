@@ -2,12 +2,15 @@
 
 Todo:
 
+- markup for id as well as class
+- cleanup template logic
 - Extract lib funcs like _is and _castArray
 - Modularize template lib so bits can be tested
 - Template unit tests
 - Integrate reactive router
 - Have reactive router support sub-paths
 - Homepage app with documentation and live examples
+- src/toolbox.js - with some useful default components
 
 Lower priority
 - animator components implemented on top of existing ones
