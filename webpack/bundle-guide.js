@@ -1,15 +1,16 @@
 
 const path      = require('path');
-const buildPath = './dev-server'
+const buildPath = './guide'
 
-module.exports = require("./defaults");
+module.exports = require("./bundle-defaults");
+
 Object.assign(
   module.exports,
   {
-    entry: "./dev-server/index.coffee",
+    entry: "./guide/index.coffee",
 
     output: {
-      path: path.resolve(__dirname, buildPath),
+      path: buildPath,
       filename: 'bundle.js'
     },
 

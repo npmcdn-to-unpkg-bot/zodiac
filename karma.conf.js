@@ -31,6 +31,6 @@ module.exports = function(config) {
       'src/**/*.js': ['webpack', 'sourcemap']
     },
 
-    webpack: require("./webpack/karma.js")
+    webpack: require("./webpack/bundle-karma.js")
   });
 }

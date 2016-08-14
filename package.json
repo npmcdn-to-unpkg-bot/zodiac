@@ -21,8 +21,8 @@
   "repository": "jbe/zodiac.git",
   "scripts": {
     "prepublish": "npm test && npm run build",
-    "build": "babel ./src --out-dir dist && webpack --config webpack/build.js",
-    "dev": "webpack-dev-server --config webpack/dev-server.js",
+    "build": "babel ./src --out-dir dist && webpack --config webpack/bundle-zodiac.js && webpack --config webpack/bundle-guide.js",
+    "dev": "webpack-dev-server --config webpack/bundle-guide.js",
     "test": "karma start --single-run",
     "travis": "karma start --single-run --browsers PhantomJS,Firefox",
     "karma": "karma start"
