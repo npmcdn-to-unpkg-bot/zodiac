@@ -31,5 +31,5 @@ function loadMdWithExamples(name) {
   });
 }
 
-loadFolder("examples");
-loadMdWithExamples("guide");
+loadFolder("guide/examples");
+loadMdWithExamples("guide/chapters");

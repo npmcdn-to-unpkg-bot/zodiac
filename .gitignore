@@ -1,5 +1,5 @@
 node_modules
-build
 dist
+dist-guide
 !dist/.keep
-!build/.keep
+!dist-guide/.keep

@@ -12,7 +12,6 @@ Data = require "./data.json.js"
 
 # _ = require("lodash")
 
-require "./index.scss"
 
 state  = $(0)
 ticker = $(0)
@@ -23,8 +22,6 @@ timer  = IntervalTimer(50, ticker.inc)
   # //     SerializeTo(
   # //       localStorage("state")));
 
-container = (content...) -> div(".container", content...)
-row = (content...) -> div(".row", content...)
 
 column = (sizing, content...) ->
   classes = Object.keys(sizing).map((breakpoint) ->
@@ -62,16 +59,6 @@ Tabs = (selection, tabs) ->
         links...
     dynamic -> tabs[selection.get()]
 
-
-require('codemirror/mode/javascript/javascript')
-require('codemirror/mode/css/css')
-require('codemirror/mode/htmlmixed/htmlmixed')
-
-require('codemirror/lib/codemirror.css')
-require('codemirror/theme/monokai.css')
-
-CodeMirror = require 'codemirror/lib/codemirror'
-
 transpile = (sourceCode) ->
   Babel.transform(sourceCode, {
     presets: ['es2015']
@@ -87,10 +74,6 @@ mockRequire = (changes, fn) ->
   fn()
   window.require = oldreq
 
-# TODO: use a patched version of zodiac mount so that document.body
-# becomes the example viewer, and other values result in an error
-# stating that output is being redirected to the example viewer.
-# Also make this mount auto-demount on new calls.
 
 CodeEditor = (text) ->
 
@@ -104,7 +87,7 @@ CodeEditor = (text) ->
         },
         lineNumbers: true
         viewportMargin: Infinity
-        theme:     'monokai'
+        theme:     'ambiance'
       })
 
       setTimeout editor.refresh.bind(editor), 1
@@ -122,10 +105,10 @@ CodeExample = (code) ->
   error = $ false
   liveInstance = null
 
-  div ".row", {style: "padding-bottom: 2em"},
-    div ".col-xl-8",
+  div ".col-md-6", {style: "padding-bottom: 2em"},
+    div {},
       CodeEditor code
-    div ".col-xl-4",
+    div {},
       cond error.get,
         pre -> error.get().message
         div {
@@ -159,7 +142,7 @@ CodeExample = (code) ->
 
 BodyNav = ->
 
-  div {},
+  div ".row",
     # Tabs($("SimpleTodos"), {
     #   HelloWorld,
     #   DomSyntax,
@@ -169,79 +152,33 @@ BodyNav = ->
     #
     hr()
 
-    Data["guide"]["01_Introduction.md"].map (item) ->
+    Data["guide/chapters"]["01-README.md"].map (item) ->
       switch item.type
-        when "markup" then div {__activated: (e) ->
+        when "markup" then div ".col-md-6", {__activated: (e) ->
           e.target.innerHTML = item.content }
         when "code" then CodeExample $ item.content
         else throw "Unexpected guide content type " + item.type
 
 
 App = ->
-  container "",
-    row "",
-      column {md: 3},
-        hr()
+  div ".container", BodyNav()
+    # row "",
+    #   column {md: 3},
+    #     hr()
+    #
+    #     input ".form-control", {type: "text", placeholder: "Search.."}
+    #
+    #     hr()
+    #
+    #     ul ".nav.nav-tabs",
+    #       li ".nav-item", a ".nav-link", {href: "#", active: false},
+    #         "Guide"
+    #       li ".nav-item", a ".nav-link", {href: "#", active: false},
+    #         "API"
+    #       li ".nav-item", a ".nav-link", {href: "#", active: false},
+    #         "Examples"
 
-        input ".form-control", {type: "text", placeholder: "Search.."}
 
-        hr()
-
-        ul ".nav.nav-tabs",
-          li ".nav-item", a ".nav-link", {href: "#", active: false},
-            "Guide"
-          li ".nav-item", a ".nav-link", {href: "#", active: false},
-            "API"
-          li ".nav-item", a ".nav-link", {href: "#", active: false},
-            "Examples"
-
-        ol ".index",
-
-          li "Introduction",
-            ol {},
-              li "Principles"
-              li "Justification"
-              li "Toolchain"
-              li "Examples"
-
-          li "Basics",
-            ol {},
-              li "Reactivity"
-              li "Variables"
-              li "Rendering"
-
-          li "Advanced",
-            ol {},
-              li "Nested variables"
-              li "Components"
-              li "Code structure"
-
-          li "Recipes",
-            ol {},
-              li "Routing"
-              li "HTTP Resources"
-              li "Twitter Bootstrap"
-
-          li "Glossary"
-            ol {},
-              li "Tracker"
-              li "ZVar"
-              li "ZDict"
-              li "Template" # not virtual dom
-              li "Component" # not a class
-              li "Router"
-
-          li "API Reference"
-            ol {},
-              li "Variables"
-              li "Templates"
-              li "Reactivity"
-              li "Router"
-              li "Serialization"
-              li "Utilities"
-
-      column {md: 9},
-        BodyNav()
 
 # CodeExample $ Data["examples"]["HelloWorld.js"]
 

@@ -1,27 +1,37 @@
 
-const path      = require('path');
-const buildPath = './guide'
+var HtmlWebpackPlugin = require('html-webpack-plugin');
+
+const webpack = require('webpack');
 
 module.exports = require("./bundle-defaults");
 
 Object.assign(
   module.exports,
   {
-    entry: "./guide/index.coffee",
+    entry: {
+      app: ["./guide/index.coffee"]
+    },
 
     output: {
-      path: buildPath,
-      filename: 'bundle.js'
+      path: "dist-guide",
+      filename: '[name].js'
     },
 
     devServer: {
       port: 8080,
       host: "0.0.0.0",
       inline: true,
-      contentBase: buildPath,
       historyApiFallback: true
     },
 
-    devtool: 'source-map'
+    plugins: [
+      new HtmlWebpackPlugin({
+        hash: true,
+        template: "guide/index.html",
+        chunks: ["app"]
+      })
+    ],
+
+    devtool: 'inline-source-map'
   }
 )

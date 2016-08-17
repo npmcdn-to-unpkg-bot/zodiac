@@ -1,20 +1,27 @@
 
+Guide:
+  - replace bootstrap with reset?
+  - visual style
+  - topbar with links, icons, search, toc
 
-Todo:
-
-- markup for id as well as class
-- cleanup template logic
-- Extract lib funcs like _is and _castArray
-- Modularize template lib so bits can be tested
-- Template unit tests
-- Integrate reactive router
-- Have reactive router support sub-paths
-- Homepage app with documentation and live examples
-- src/toolbox.js - with some useful default components
-
-Lower priority
-- animator components implemented on top of existing ones
+Zodiac:
+  - markup for id as well as class
+  - Port reactive router
+  - Have reactive router support sub-paths
 
 Maybe:
 - Allow reactive variables directly to infer .get?
 - More efficient loops by enabling reactive getter?
+
+Housekeeping
+  - only require tracker when it is not defined
+  - require -> import
+  - coffeescript vs babel
+  - cleaner template logic
+  - extract funcs like _is and _castArray
+  - Modularize for testability?
+  - Unit tests
+  - bundle some useful default components (architecture and ui)
+
+Low priority
+  - animator components implemented on top of existing ones?

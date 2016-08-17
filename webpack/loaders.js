@@ -9,14 +9,6 @@ module.exports = [
     loader: 'coffee-loader'
   },
   {
-    test: /\.scss$/,
-    loaders: ["style", "css", "sass"]
-  },
-  {
-    test: /\.css$/,
-    loaders: ["style", "css"]
-  },
-  {
     test: /\.json\.js/,
     loader: 'tojson'
   }
