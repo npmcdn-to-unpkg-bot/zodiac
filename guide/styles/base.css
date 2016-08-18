@@ -1,0 +1,20 @@
+
+body {
+  font: 16px "Crimson Text", serif; 
+}
+
+main, footer, body > header {
+  max-width: 64ch;
+  margin: auto; 
+}
+
+ol.index {
+  margin: 0;
+  padding: 0;
+}
+
+.CodeMirror {
+  height: auto !important;
+  font-size: 0.9em;
+  box-shadow: 5px 5px 2em brown !important;
+}

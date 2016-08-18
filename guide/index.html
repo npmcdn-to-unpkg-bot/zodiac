@@ -4,8 +4,9 @@
     <meta charset="utf-8">
     <title>Zodiac Guide</title>
 
-    <link href="https://fonts.googleapis.com/css?family=Droid+Sans:700|Droid+Sans+Mono|Crimson+Text:400,400italic" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Crimson+Text:400,400i,600" rel="stylesheet" type="text/css" />
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0&#45;alpha.2/css/bootstrap.min.css"> -->
+
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/codemirror.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/theme/ambiance.min.css">
@@ -17,26 +18,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/mode/javascript/javascript.min.js"></script>
 
     <style>
-
-      body {
-        font: 16px/1.5em "Crimson Text", serif; 
-      }
-
-      main, footer, body > header {
-        max-width: 64ch;
-        margin: auto; 
-      }
-
-      ol.index {
-        margin: 0;
-        padding: 0;
-      }
-
-      .CodeMirror {
-        height: auto !important;
-        font-size: 0.9em;
-        box-shadow: 5px 5px 2em brown !important;
-      }
+      <%= require("raw!./styles/fix.css") %>
+      <%= require("raw!./styles/base.css") %>
     </style>
   </head>
   <body>

@@ -133,3 +133,15 @@ Zodiac is in alpha for now, and most things happen in master. As the API matures
 `npm update` installs dependencies.
 `npm run dev` starts a local dev playground (it's just the guide with hot-reloading of the zodiac source itself).
 `npm karma` boots up Karma so you can test across browsers
+
+
+
+>> Serialization:
+
+state  = $(0)
+timer  = IntervalTimer(50, state.inc)
+
+  # // state.persistence =
+  # //   Persist(
+  # //     SerializeTo(
+  # //       localStorage("state")));

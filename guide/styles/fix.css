@@ -1,0 +1,262 @@
+/*
+ * This is a mix of jaydenseric' fix.css Version 0.1.1, normalize.css,
+ * some bootstrap styles, and my own stuff.
+ *
+ * Fix: https://github.com/jaydenseric/Fix
+*/
+
+html {
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+}
+body {
+  margin: 0;
+  line-height: 1;
+  color: #333;
+}
+
+iframe {
+  border: 0;
+}
+main,
+{
+  display: block;
+}
+ul,
+ol {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-left: 0;
+}
+li {
+  display: block;
+}
+
+
+dl { margin: 2em 0 1.5em 0; }
+dt { margin: 1em 0 0 0; }
+dd { margin: 0 0 0 2.5em; }
+dt { font-weight: 600; }
+
+/* dd, dt { margin-top 2em; } */
+/* dd { margin-left: 0; } */
+
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+  font-weight: normal;
+  margin-top: 0;
+  margin-bottom: 0;
+  font-size: inherit;
+}
+mark {
+  background: #ff0;
+  color: #000;
+}
+small {
+ font-size: 80%;
+}
+blockquote {
+  margin: 0;
+  padding: 0;
+}
+p {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+sub, sup {
+  position: relative;
+  vertical-align: baseline;
+  font-size: 75%;
+  line-height: 0;
+}
+sup { top: -0.5em; }
+sub { bottom: -0.25em; }
+strong { font-weight: bold; }
+figure { margin: 0; }
+svg:not(:root) { overflow: hidden; }
+
+img {
+  border: 0;
+  max-width: 100%;
+  height: auto;
+  vertical-align: middle;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  background-color: transparent;
+}
+
+hr {
+  box-sizing: content-box;
+  height: 0;
+  border: none;
+  border-top: 2px solid #eee;
+}
+
+pre, code, kbd, samp {
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-size: 0.85em;
+}
+code, kbd, samp {
+  padding: 2px 4px;
+}
+
+code {
+  color: #c7254e;
+  background-color: #f9f2f4;
+  border-radius: 4px;
+}
+
+pre code {
+  color: inherit;
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+  white-space: pre-wrap;
+}
+
+kbd {
+  color: #fff;
+  background-color: #333;
+  border-radius: 2px;
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,.25);
+}
+
+pre {
+  overflow: auto;
+  background-color: #f9f9f9;
+
+  padding: 12px;
+  margin: 1.5em 0 2em 0;
+
+  color: #555;
+  border: 1px solid #ccc;
+
+  word-break: break-all;
+  word-wrap: break-word;
+}
+
+
+
+a:active, a:hover { outline: 0; }
+
+dfn { font-style: italic; }
+strong { font-weight: bold; }
+[hidden], template { display: none; }
+abbr[title] { border-bottom: 1px dotted grey; }
+
+address {
+  margin-bottom: 24px;
+  font-style: normal;
+  line-height: 1.5;
+}
+
+button {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  text-align: inherit;
+  text-transform: inherit;
+  font: inherit;
+  -webkit-font-smoothing: inherit;
+  letter-spacing: inherit;
+  background: none;
+  cursor: pointer;
+  overflow: visible;
+}
+button,
+input,
+optgroup,
+select,
+textarea {
+  color: inherit;
+  font: inherit;
+  margin: 0;
+  overflow: auto;
+}
+::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+
+button, select { text-transform: none; }
+button[disabled], html input[disabled] { cursor: default; }
+input { line-height: normal; }
+input[type="checkbox"],
+input[type="radio"] {
+ box-sizing: border-box;
+ padding: 0;
+}
+
+optgroup { font-weight: bold; }
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+td, th { padding: 0; }
+
+/* Container styling */
+
+.text {
+  line-height: 1.5;
+  margin: auto;
+  width: 1000px;
+}
+
+.text h1, .text h2, .text h3, .text h4, .text h5, .text h6 {
+  line-height: 1.1;
+  margin: 2em 0.5em 1em 0;
+  font-weight: 600; 
+}
+
+.text h1 { font-size: 5em; }
+.text h2 { font-size: 3em; }
+.text h3 { font-size: 2em; }
+
+.text p {
+  margin: 0 0 12px;
+}
+
+.text mark, .text .mark {
+   background-color: #fee;
+   padding: .2em;
+}
+
+.text ul, .text ol {
+  margin: 1.5em 0 2em 2em;
+}
+
+.text li {
+  display: list-item;
+}
+
+.text ul ul,
+.text ul ol,
+.text ol ul,
+.text ol ol {
+  margin: 0 0 0.5em 2em;
+}
+
+.text hr {
+  margin: 2em 0;
+}
+
+.text blockquote p:last-child,
+.text blockquote ul:last-child,
+.text blockquote ol:last-child {
+  margin-bottom: 0;
+}
+
+.text blockquote {
+ padding: 12px 24px;
+ margin: 0 0 24px;
+/*  font-size: @blockquote-font-size; */
+ border-left: 5px solid #eee;
+}

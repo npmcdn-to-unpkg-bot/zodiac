@@ -1,6 +1,5 @@
-
 {
-  $, IntervalTimer, Persist, localStorage, SerializeTo, autorun,
+  $, Persist, localStorage, SerializeTo, autorun,
   debounce,
   mount,
   cond, dynamic, component, tag, text, dom,
@@ -10,24 +9,14 @@
 
 Data = require "./data.json.js"
 
-# _ = require("lodash")
 
 
-state  = $(0)
-ticker = $(0)
-timer  = IntervalTimer(50, ticker.inc)
-
-  # // state.persistence =
-  # //   Persist(
-  # //     SerializeTo(
-  # //       localStorage("state")));
-
-
-column = (sizing, content...) ->
+col = (sizing, content...) ->
   classes = Object.keys(sizing).map((breakpoint) ->
     "col-" + breakpoint + "-" + sizing[breakpoint]
   )
-  div({class: classes}, content...)
+  userAttrs = if sizing.attrs then sizing.attrs else {}
+  div(Object.assign({class: classes}, userAttrs), content...)
 
 nav = (classes, content...) ->
   ul(classes, content...)
@@ -105,7 +94,7 @@ CodeExample = (code) ->
   error = $ false
   liveInstance = null
 
-  div ".col-md-6", {style: "padding-bottom: 2em"},
+  col {md: 6},
     div {},
       CodeEditor code
     div {},
@@ -150,18 +139,17 @@ BodyNav = ->
     #   SimpleTodos
     # })
     #
-    hr()
-
     Data["guide/chapters"]["01-README.md"].map (item) ->
       switch item.type
-        when "markup" then div ".col-md-6", {__activated: (e) ->
-          e.target.innerHTML = item.content }
+        when "markup" then col {md: 6, attrs: {
+          __activated: (e) ->
+            e.target.innerHTML = item.content }}
         when "code" then CodeExample $ item.content
         else throw "Unexpected guide content type " + item.type
 
 
 App = ->
-  div ".container", BodyNav()
+  div ".text", BodyNav()
     # row "",
     #   column {md: 3},
     #     hr()
