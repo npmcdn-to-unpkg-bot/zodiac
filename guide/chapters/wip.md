@@ -35,7 +35,7 @@ Using NodeJS and npm: `npm install --save zodiac`
 
 -- Or --
 
-Using npmcdn bundle: `TODO`
+Using unpkg bundle: `TODO`
 
 The source code itself was written in ES2015 with some additions, but this is all pre-transpiled to ES5 for the actual packages, which means they will work in any modern browser with babel polyfill.
 
